@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Pencapaian Pelajar — Diploma Pengurusan Hotel</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #f5f0eb; color: #1a1a2e; font-size: 14px; display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar { width: 230px; min-height: 100vh; background: linear-gradient(180deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top:0; left:0; bottom:0; z-index:100; }
+.sb-logo { padding: 20px 18px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:10px; }
+.sb-logo-icon { font-size: 26px; }
+.sb-logo-text h2 { font-size: 13px; font-weight: 800; line-height: 1.3; }
+.sb-logo-text p  { font-size: 10px; color: #94a3b8; margin-top: 1px; }
+.sb-user { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:10px; }
+.sb-avatar { width:34px; height:34px; border-radius:50%; background: linear-gradient(135deg,#f59e0b,#d97706); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
+.sb-uname { font-size:12px; font-weight:700; }
+.sb-urole { font-size:10px; color:#94a3b8; }
+.sb-nav { padding: 8px 0; flex:1; overflow-y:auto; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:10px 18px; font-size:12px; font-weight:500; color:#94a3b8; cursor:pointer; transition:all 0.15s; border-left:3px solid transparent; white-space:nowrap; }
+.nav-item:hover  { background:rgba(255,255,255,0.06); color:#fff; }
+.nav-item.active { background:rgba(245,158,11,0.15); color:#f59e0b; border-left-color:#f59e0b; }
+.nav-icon { font-size:14px; width:18px; text-align:center; flex-shrink:0; }
+.nav-badge { margin-left:auto; background:#ef4444; color:#fff; font-size:10px; font-weight:800; padding:1px 6px; border-radius:10px; }
+.sb-footer { padding:12px 18px; border-top:1px solid rgba(255,255,255,0.08); font-size:10px; color:#475569; }
+
+/* ── MAIN ── */
+.main { margin-left:230px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+
+/* ── TOPBAR ── */
+.topbar { background:#fff; border-bottom:1px solid #e5e7eb; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.topbar-left h1 { font-size:17px; font-weight:800; color:#1a1a2e; }
+.topbar-left p  { font-size:11px; color:#57606a; margin-top:1px; }
+.topbar-right { display:flex; gap:8px; align-items:center; }
+.tb-btn { border:1px solid #e5e7eb; background:#fff; border-radius:8px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; color:#57606a; display:flex; align-items:center; gap:6px; }
+.tb-btn:hover { background:#f7f8fa; }
+.tb-btn.gold { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+.tb-btn.gold:hover { background:#d97706; }
+.tb-btn.purple { background:#fff; color:#7c5cd8; border-color:#7c5cd8; }
+.tb-btn.purple.on { background:#7c5cd8; color:#fff; }
+.notif-wrap { position:relative; }
+.notif-dot { position:absolute; top:4px; right:4px; width:8px; height:8px; background:#ef4444; border-radius:50%; }
+
+/* ── CONTENT ── */
+.content { padding:20px 24px; flex:1; }
+.page-section { display:none; }
+.page-section.active { display:block; }
+.mb16 { margin-bottom:16px; }
+.mb20 { margin-bottom:20px; }
+
+/* ── ALERT ── */
+.alert-bar { background:#fff8e1; border:1px solid #fde68a; border-left:4px solid #f59e0b; border-radius:8px; padding:10px 14px; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+.alert-bar.red { background:#fef2f2; border-color:#fecaca; border-left-color:#ef4444; }
+.alert-bar.hidden { display:none; }
+.alert-txt { flex:1; font-size:12px; font-weight:600; }
+.alert-close { background:none; border:none; cursor:pointer; font-size:15px; color:#9ca3af; }
+
+/* ── COUNTDOWN ── */
+.countdown-bar { background: linear-gradient(135deg,#1a1a2e,#0f3460); color:#fff; border-radius:10px; padding:14px 20px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
+.cd-label { font-size:12px; color:#94a3b8; }
+.cd-title { font-size:15px; font-weight:800; margin-top:2px; }
+.cd-boxes { display:flex; gap:8px; }
+.cd-box { background:rgba(255,255,255,0.1); border-radius:8px; padding:8px 14px; text-align:center; min-width:50px; }
+.cd-num { font-size:22px; font-weight:800; color:#f59e0b; line-height:1; }
+.cd-unit { font-size:10px; color:#94a3b8; margin-top:2px; }
+
+/* ── STAT CARDS ── */
+.stat-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:20px; }
+.stat-card { background:#fff; border-radius:12px; padding:16px 18px; border:1px solid #e5e7eb; border-top:3px solid; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; }
+.stat-card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,0.08); }
+.sc-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.sc-label { font-size:10px; font-weight:700; color:#57606a; text-transform:uppercase; letter-spacing:0.5px; }
+.sc-trend { font-size:10px; font-weight:700; padding:2px 6px; border-radius:8px; }
+.trend-up { background:#f0fdf4; color:#16a34a; }
+.trend-dn { background:#fef2f2; color:#dc2626; }
+.sc-val { font-size:30px; font-weight:800; margin:6px 0 3px; line-height:1; }
+.sc-desc { font-size:11px; color:#57606a; }
+.c-gold   { border-top-color:#f59e0b; } .c-gold   .sc-val { color:#d97706; }
+.c-green  { border-top-color:#22c55e; } .c-green  .sc-val { color:#16a34a; }
+.c-blue   { border-top-color:#3b82d4; } .c-blue   .sc-val { color:#3b82d4; }
+.c-purple { border-top-color:#7c5cd8; } .c-purple .sc-val { color:#7c5cd8; }
+.c-red    { border-top-color:#ef4444; } .c-red    .sc-val { color:#ef4444; }
+
+/* ── GRID LAYOUTS ── */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:20px; }
+.g-side { display:grid; grid-template-columns:1fr 340px; gap:16px; margin-bottom:20px; }
+
+/* ── PANEL ── */
+.panel { background:#fff; border-radius:12px; border:1px solid #e5e7eb; padding:18px; }
+.panel.gold-border { border-top:3px solid #f59e0b; }
+.p-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.p-title { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:#1a1a2e; }
+.p-icon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+.pi-gold   { background:#fff8e1; }
+.pi-green  { background:#f0fdf4; }
+.pi-blue   { background:#eff6ff; }
+.pi-purple { background:#faf5ff; }
+.pi-red    { background:#fef2f2; }
+.pi-gray   { background:#f7f8fa; }
+
+/* ── BUTTONS ── */
+.btn { padding:6px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all 0.15s; }
+.btn-gold   { background:#f59e0b; color:#fff; } .btn-gold:hover   { background:#d97706; }
+.btn-green  { background:#22c55e; color:#fff; } .btn-green:hover  { background:#16a34a; }
+.btn-blue   { background:#3b82d4; color:#fff; } .btn-blue:hover   { background:#2563eb; }
+.btn-red    { background:#ef4444; color:#fff; } .btn-red:hover    { background:#dc2626; }
+.btn-purple { background:#7c5cd8; color:#fff; } .btn-purple:hover { background:#6644c0; }
+.btn-ghost  { background:#f7f8fa; color:#57606a; border:1px solid #e5e7eb; } .btn-ghost:hover { background:#e5e7eb; }
+
+/* ── GRADE SUMMARY ── */
+.grade-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:10px; }
+.grade-box { border-radius:9px; padding:12px 8px; text-align:center; border:1px solid #e5e7eb; cursor:pointer; transition:transform 0.15s; }
+.grade-box:hover { transform:translateY(-2px); }
+.grade-num { font-size:22px; font-weight:800; }
+.grade-lbl { font-size:11px; color:#57606a; margin-top:3px; }
+.gA { background:#f0fdf4; } .gA .grade-num { color:#16a34a; }
+.gB { background:#eff6ff; } .gB .grade-num { color:#3b82d4; }
+.gC { background:#fff8e1; } .gC .grade-num { color:#d97706; }
+.gD { background:#fef2f2; } .gD .grade-num { color:#ef4444; }
+.gF { background:#f5f3ff; } .gF .grade-num { color:#7c5cd8; }
+
+/* ── SEARCH & FILTER ── */
+.sf-bar { display:flex; gap:10px; margin-bottom:14px; align-items:center; flex-wrap:wrap; }
+.sf-input { flex:1; min-width:200px; max-width:280px; padding:8px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:13px; font-family:inherit; outline:none; }
+.sf-input:focus { border-color:#f59e0b; }
+.fpills { display:flex; gap:6px; flex-wrap:wrap; }
+.fp { padding:5px 13px; border-radius:20px; border:1px solid #e5e7eb; background:#fff; font-size:11px; font-weight:700; cursor:pointer; color:#57606a; transition:all 0.15s; }
+.fp:hover { border-color:#f59e0b; color:#d97706; }
+.fp.active { color:#fff; border-color:transparent; }
+.fp.fAll.active  { background:#1a1a2e; }
+.fp.fExc.active  { background:#16a34a; }
+.fp.fGood.active { background:#3b82d4; }
+.fp.fAvg.active  { background:#d97706; }
+.fp.fLow.active  { background:#ef4444; }
+
+/* ── STUDENT TABLE ── */
+.stu-table { width:100%; border-collapse:collapse; font-size:12px; }
+.stu-table th { text-align:left; padding:8px 10px; border-bottom:2px solid #e5e7eb; background:#f7f8fa; font-size:10px; font-weight:700; color:#57606a; text-transform:uppercase; letter-spacing:0.4px; white-space:nowrap; }
+.stu-table td { padding:9px 10px; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+.stu-table tr:hover td { background:#fffbf0; }
+.stu-table tr.hidden { display:none; }
+.stu-nm { font-weight:700; font-size:13px; }
+.stu-id { font-size:10px; color:#9ca3af; }
+.attend-mini { display:flex; align-items:center; gap:5px; }
+.att-bar { width:50px; background:#f0f0f0; border-radius:20px; height:5px; overflow:hidden; }
+.att-fill { height:100%; border-radius:20px; }
+.lv-pill { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; color:#fff; white-space:nowrap; }
+.act-btn { background:#f7f8fa; border:1px solid #e5e7eb; border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; color:#57606a; }
+.act-btn:hover { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+
+/* ── SUBJECT CARDS ── */
+.subj-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.subj-card { background:#f7f8fa; border:1px solid #e5e7eb; border-radius:10px; padding:14px; border-left:4px solid; }
+.subj-name { font-size:11px; font-weight:700; color:#57606a; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px; }
+.subj-avg  { font-size:24px; font-weight:800; margin-bottom:4px; }
+.subj-bar  { background:#e5e7eb; border-radius:20px; height:6px; overflow:hidden; margin-bottom:6px; }
+.subj-fill { height:100%; border-radius:20px; transition:width 0.6s; }
+.subj-meta { display:flex; justify-content:space-between; font-size:10px; color:#9ca3af; }
+
+/* ── BAR CHART ── */
+.chart-wrap { overflow-x:auto; padding-bottom:4px; }
+.chart-svg  { display:block; }
+.cbar { transition:opacity 0.15s; cursor:pointer; }
+.cbar:hover { opacity:0.7; }
+
+/* ── TOP 5 ── */
+.top5-list { display:flex; flex-direction:column; gap:10px; }
+.top5-item { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; cursor:pointer; transition:all 0.15s; }
+.top5-item:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+.top5-rank { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; color:#fff; flex-shrink:0; }
+.r1 { background:#f59e0b; } .r2 { background:#9ca3af; } .r3 { background:#cd7c4f; } .r4 { background:#3b82d4; } .r5 { background:#7c5cd8; }
+.top5-info { flex:1; }
+.top5-name { font-size:13px; font-weight:700; }
+.top5-sub  { font-size:11px; color:#57606a; }
+.top5-score { font-size:20px; font-weight:800; }
+.top5-medal { font-size:18px; }
+
+/* ── BEST IN SUBJECT ── */
+.bis-list { display:flex; flex-direction:column; gap:8px; }
+.bis-item { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#f7f8fa; border-radius:8px; border-left:3px solid; }
+.bis-subj { font-size:12px; font-weight:700; }
+.bis-name { font-size:11px; color:#57606a; }
+.bis-score { font-size:14px; font-weight:800; }
+
+/* ── RISK TABLE ── */
+.risk-list { display:flex; flex-direction:column; gap:8px; }
+.risk-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:#fef2f2; border:1px solid #fecaca; border-radius:9px; border-left:4px solid #ef4444; }
+.risk-name { font-weight:700; font-size:13px; flex:1; }
+.risk-reason { font-size:11px; color:#dc2626; }
+.risk-action { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:#ef4444; color:#fff; cursor:pointer; }
+.risk-action:hover { background:#dc2626; }
+
+/* ── TASKS ── */
+.task-list { display:flex; flex-direction:column; gap:10px; }
+.task-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:#f7f8fa; border-radius:9px; border:1px solid #e5e7eb; }
+.task-info { flex:1; }
+.task-name { font-size:13px; font-weight:700; }
+.task-due  { font-size:11px; color:#57606a; margin-top:2px; }
+.task-pill { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
+.task-pill:hover { opacity:0.75; }
+.tp-done   { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+.tp-prog   { background:#fff8e1; color:#d97706; border:1px solid #fde68a; }
+.tp-new    { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+.tp-rev    { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+
+/* ── ACTIVITIES ── */
+.act-list { display:flex; flex-direction:column; gap:8px; }
+.act-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:9px; border:1px solid #e5e7eb; background:#fff; }
+.act-date { text-align:center; min-width:42px; }
+.act-day  { font-size:20px; font-weight:800; color:#f59e0b; line-height:1; }
+.act-month{ font-size:10px; color:#9ca3af; text-transform:uppercase; }
+.act-info { flex:1; }
+.act-name { font-size:13px; font-weight:700; }
+.act-loc  { font-size:11px; color:#57606a; margin-top:1px; }
+.act-type { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; color:#fff; }
+.at-visit  { background:#f59e0b; }
+.at-exam   { background:#ef4444; }
+.at-prac   { background:#22c55e; }
+.at-event  { background:#7c5cd8; }
+.at-train  { background:#3b82d4; }
+
+/* ── CHECKLIST ── */
+.chk-list { display:flex; flex-direction:column; gap:7px; }
+.chk-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:#f7f8fa; border-radius:8px; cursor:pointer; user-select:none; transition:background 0.15s; }
+.chk-item:hover { background:#fff8e1; }
+.chk-box { width:17px; height:17px; border-radius:4px; border:2px solid #d1d5db; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; transition:all 0.15s; }
+.chk-done { background:#f59e0b; border-color:#f59e0b; color:#fff; }
+.chk-pend { background:#fff; color:transparent; }
+.chk-lbl  { flex:1; font-size:12px; }
+.chk-lbl.struck { text-decoration:line-through; color:#9ca3af; }
+.chk-tag  { font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; color:#fff; }
+.prog-wrap { background:#f0f0f0; border-radius:20px; height:7px; overflow:hidden; margin-top:10px; }
+.prog-fill { height:100%; border-radius:20px; background:linear-gradient(90deg,#f59e0b,#d97706); transition:width 0.4s; }
+.prog-txt  { font-size:11px; color:#57606a; margin-top:5px; }
+
+/* ── EDIT PANEL ── */
+.edit-panel { display:none; background:#fff; border:2px solid #7c5cd8; border-radius:12px; padding:16px 18px; margin-bottom:16px; }
+.edit-panel.open { display:block; }
+.edit-panel h3 { font-size:13px; font-weight:800; color:#7c5cd8; margin-bottom:12px; }
+.eg { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.ef { display:flex; flex-direction:column; gap:3px; }
+.ef label { font-size:10px; font-weight:700; color:#57606a; text-transform:uppercase; letter-spacing:0.4px; }
+.ef input, .ef select { padding:6px 9px; border:1px solid #e5e7eb; border-radius:7px; font-size:12px; font-family:inherit; outline:none; }
+.ef input:focus, .ef select:focus { border-color:#7c5cd8; }
+.sel-row { display:flex; gap:8px; align-items:flex-end; margin-bottom:12px; }
+.sel-row .ef { flex:1; }
+.ea { display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; }
+
+/* ── MODAL ── */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:300; align-items:center; justify-content:center; }
+.overlay.open { display:flex; }
+.modal { background:#fff; border-radius:14px; padding:26px 24px; max-width:400px; width:92%; box-shadow:0 12px 40px rgba(0,0,0,0.2); text-align:center; }
+.modal-top { font-size:36px; margin-bottom:6px; }
+.modal-name { font-size:18px; font-weight:800; margin-bottom:2px; }
+.modal-role { font-size:12px; color:#57606a; margin-bottom:14px; }
+.modal-score { font-size:44px; font-weight:800; color:#f59e0b; line-height:1; }
+.modal-grade { font-size:13px; font-weight:700; margin-top:2px; }
+.modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:14px 0; text-align:left; }
+.modal-kv { background:#f7f8fa; border-radius:8px; padding:8px 12px; }
+.modal-k { font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; }
+.modal-v { font-size:13px; font-weight:700; margin-top:2px; }
+.modal-close { display:block; width:100%; padding:10px; background:#1a1a2e; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; margin-top:4px; }
+.modal-close:hover { background:#f59e0b; }
+
+/* ── NOTIF PANEL ── */
+.notif-panel { display:none; position:fixed; top:60px; right:16px; width:290px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:200; overflow:hidden; }
+.notif-panel.open { display:block; }
+.notif-hd { padding:10px 14px; font-size:12px; font-weight:800; border-bottom:1px solid #e5e7eb; background:#f7f8fa; }
+.notif-item { padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:11px; }
+.notif-item:last-child { border-bottom:none; }
+.notif-item strong { display:block; font-size:12px; margin-bottom:1px; }
+
+footer { text-align:center; padding:14px 24px; border-top:1px solid #e5e7eb; font-size:11px; color:#9ca3af; background:#fff; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">🏨</div>
+    <div class="sb-logo-text">
+      <h2>Pengurusan Hotel</h2>
+      <p>Student Achievement Portal</p>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar">AZ</div>
+    <div>
+      <div class="sb-uname">Azlina Alias</div>
+      <div class="sb-urole">Pensyarah Kanan</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-item active" onclick="nav('main')"><span class="nav-icon">🏠</span>Dashboard Utama</div>
+    <div class="nav-item" onclick="nav('students')"><span class="nav-icon">👥</span>Senarai Pelajar<span class="nav-badge" id="riskBadge">-</span></div>
+    <div class="nav-item" onclick="nav('subjects')"><span class="nav-icon">📚</span>Prestasi Subjek</div>
+    <div class="nav-item" onclick="nav('ranking')"><span class="nav-icon">🏆</span>Ranking & Anugerah</div>
+    <div class="nav-item" onclick="nav('risk')"><span class="nav-icon">⚠️</span>Pelajar Berisiko</div>
+    <div class="nav-item" onclick="nav('tasks')"><span class="nav-icon">📝</span>Tugasan & Penilaian</div>
+    <div class="nav-item" onclick="nav('activities')"><span class="nav-icon">📅</span>Jadual & Aktiviti</div>
+    <div class="nav-item" onclick="nav('checklist')"><span class="nav-icon">✅</span>Checklist Kompetensi</div>
+  </nav>
+  <div class="sb-footer">Sesi Akademik 2024–2025 &nbsp;|&nbsp; Sem 2</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="pgTitle">Dashboard Utama</h1>
+      <p id="pgSub">Diploma Pengurusan Hotel — Gambaran Keseluruhan</p>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-wrap">
+        <button class="tb-btn" onclick="toggleNotif()">🔔 Notifikasi<div class="notif-dot" id="nDot"></div></button>
+      </div>
+      <button class="tb-btn purple" id="editBtn" onclick="toggleEdit()">✏️ Edit Data</button>
+      <button class="tb-btn gold" onclick="nav('main')">🏠 Utama</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ MAIN DASHBOARD ══ -->
+    <div class="page-section active" id="pg-main">
+      <div class="alert-bar hidden" id="alertBar">
+        <span>⚠️</span><span class="alert-txt" id="alertTxt"></span>
+        <button class="alert-close" onclick="this.parentElement.classList.add('hidden')">✕</button>
+      </div>
+      <div class="countdown-bar">
+        <div><div class="cd-label">🎓 Peperiksaan Akhir Semester</div><div class="cd-title">Diploma Pengurusan Hotel — Sem 2, 2025</div></div>
+        <div class="cd-boxes" id="cdBoxes"></div>
+      </div>
+      <div class="stat-row" id="statRow"></div>
+      <div class="g-side">
+        <div class="panel gold-border">
+          <div class="p-head"><div class="p-title"><div class="p-icon pi-gold">👥</div>Ringkasan Gred Pelajar</div><button class="btn btn-gold" onclick="nav('students')">Lihat Semua →</button></div>
+          <div class="grade-grid" id="gradeGrid"></div>
+          <p style="font-size:11px;color:#57606a;margin-top:6px;" id="gradeTotal"></p>
+        </div>
+        <div class="panel">
+          <div class="p-head"><div class="p-title"><div class="p-icon pi-gold">📝</div>Tugasan Terkini</div><button class="btn btn-ghost" onclick="nav('tasks')">Lihat →</button></div>
+          <div class="task-list" id="taskSnap"></div>
+        </div>
+      </div>
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-blue">📊</div>Graf Markah Keseluruhan Pelajar</div></div>
+        <div class="chart-wrap"><svg id="mainChart" height="160" style="display:block;"></svg></div>
+      </div>
+    </div>
+
+    <!-- ══ STUDENTS ══ -->
+    <div class="page-section" id="pg-students">
+      <div class="edit-panel" id="editPanel">
+        <h3>✏️ Edit / Tambah Data Pelajar</h3>
+        <div class="sel-row">
+          <div class="ef"><label>Pilih Pelajar</label><select id="eSel" onchange="loadStu()"></select></div>
+          <button class="btn btn-green" onclick="addStu()">+ Tambah Pelajar</button>
+        </div>
+        <div class="eg">
+          <div class="ef"><label>Nama</label><input id="eN" placeholder="Nama"></div>
+          <div class="ef"><label>No. Matrik</label><input id="eM" placeholder="DPH2024001"></div>
+          <div class="ef"><label>Semester</label><select id="eSm"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+          <div class="ef"><label>Kehadiran (%)</label><input id="eAt" type="number" min="0" max="100"></div>
+          <div class="ef"><label>Hotel Ops</label><input id="eS1" type="number" min="0" max="100"></div>
+          <div class="ef"><label>F&amp;B Service</label><input id="eS2" type="number" min="0" max="100"></div>
+          <div class="ef"><label>Housekeeping</label><input id="eS3" type="number" min="0" max="100"></div>
+          <div class="ef"><label>Front Office</label><input id="eS4" type="number" min="0" max="100"></div>
+          <div class="ef"><label>Event Mgmt</label><input id="eS5" type="number" min="0" max="100"></div>
+          <div class="ef"><label>Hospitality Law</label><input id="eS6" type="number" min="0" max="100"></div>
+          <div class="ef"><label>Gred Keseluruhan</label><select id="eG"><option>A+</option><option>A</option><option>A-</option><option>B+</option><option>B</option><option>B-</option><option>C+</option><option>C</option><option>C-</option><option>D</option><option>F</option></select></div>
+          <div class="ef"><label>Status</label><select id="eSt"><option>Lulus</option><option>Ulang</option><option>Gagal</option></select></div>
+        </div>
+        <div class="ea">
+          <button class="btn btn-purple" onclick="saveStu()">💾 Simpan</button>
+          <button class="btn btn-red" onclick="delStu()">🗑️ Padam</button>
+        </div>
+      </div>
+      <div class="sf-bar">
+        <input class="sf-input" id="sfQ" placeholder="🔍 Cari nama atau no. matrik..." oninput="renderTable()">
+        <div class="fpills">
+          <button class="fp fAll active" onclick="setF('all',this)">Semua</button>
+          <button class="fp fExc" onclick="setF('exc',this)">⭐ Cemerlang</button>
+          <button class="fp fGood" onclick="setF('good',this)">👍 Baik</button>
+          <button class="fp fAvg" onclick="setF('avg',this)">😐 Sederhana</button>
+          <button class="fp fLow" onclick="setF('low',this)">🚨 Berisiko</button>
+        </div>
+      </div>
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-gold">📋</div>Senarai Pelajar — Diploma Pengurusan Hotel</div><button class="btn btn-ghost" onclick="sortTable()">⇅ Sort Markah</button></div>
+        <div style="overflow-x:auto;"><table class="stu-table"><thead><tr><th>#</th><th>Nama</th><th>No. Matrik</th><th>Sem</th><th>Markah Avg</th><th>Gred</th><th>Kehadiran</th><th>Status</th><th></th></tr></thead><tbody id="stuBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ SUBJECTS ══ -->
+    <div class="page-section" id="pg-subjects">
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-blue">📚</div>Prestasi Pelajar Mengikut Subjek</div></div>
+        <div class="subj-cards" id="subjCards"></div>
+      </div>
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-blue">📊</div>Graf Perbandingan Purata Subjek</div></div>
+        <div class="chart-wrap"><svg id="subjChart" height="180" style="display:block;"></svg></div>
+      </div>
+    </div>
+
+    <!-- ══ RANKING ══ -->
+    <div class="page-section" id="pg-ranking">
+      <div class="g2">
+        <div class="panel">
+          <div class="p-head"><div class="p-title"><div class="p-icon pi-gold">🏆</div>Top 5 Pelajar Terbaik</div></div>
+          <div class="top5-list" id="top5List"></div>
+        </div>
+        <div class="panel">
+          <div class="p-head"><div class="p-title"><div class="p-icon pi-green">🥇</div>Best in Subject</div></div>
+          <div class="bis-list" id="bisList"></div>
+        </div>
+      </div>
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-blue">🎖️</div>Pelajar Kehadiran Terbaik</div></div>
+        <div class="top5-list" id="attendList"></div>
+      </div>
+    </div>
+
+    <!-- ══ RISK ══ -->
+    <div class="page-section" id="pg-risk">
+      <div class="alert-bar red mb20"><span>🚨</span><span class="alert-txt" id="riskAlertTxt"></span></div>
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-red">⚠️</div>Pelajar Memerlukan Perhatian</div></div>
+        <div class="risk-list" id="riskList"></div>
+      </div>
+    </div>
+
+    <!-- ══ TASKS ══ -->
+    <div class="page-section" id="pg-tasks">
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-gold">📝</div>Tugasan &amp; Penilaian</div><button class="btn btn-green" onclick="addTask()">+ Tambah Tugasan</button></div>
+        <div class="task-list" id="taskFull"></div>
+      </div>
+    </div>
+
+    <!-- ══ ACTIVITIES ══ -->
+    <div class="page-section" id="pg-activities">
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-purple">📅</div>Jadual &amp; Aktiviti Akan Datang</div><button class="btn btn-green" onclick="addAct()">+ Tambah Aktiviti</button></div>
+        <div class="act-list" id="actList"></div>
+      </div>
+    </div>
+
+    <!-- ══ CHECKLIST ══ -->
+    <div class="page-section" id="pg-checklist">
+      <div class="panel mb20">
+        <div class="p-head"><div class="p-title"><div class="p-icon pi-gold">✅</div>Checklist Kompetensi Hotel</div><button class="btn btn-green" onclick="addChk()">+ Tambah Item</button></div>
+        <div class="chk-list" id="chkList"></div>
+        <div class="prog-wrap"><div class="prog-fill" id="pFill"></div></div>
+        <div class="prog-txt" id="pTxt"></div>
+      </div>
+    </div>
+
+  </div>
+  <footer>Made with IBM Bob &nbsp;|&nbsp; Diploma Pengurusan Hotel &nbsp;|&nbsp; Sesi 2024–2025</footer>
+</div>
+
+<!-- NOTIF -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-hd">🔔 Notifikasi Penting</div>
+  <div id="notifBody"></div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-top" id="mTop"></div>
+    <div class="modal-name" id="mName"></div>
+    <div class="modal-role" id="mRole"></div>
+    <div class="modal-score" id="mScore"></div>
+    <div class="modal-grade" id="mGrade"></div>
+    <div class="modal-grid" id="mGrid"></div>
+    <button class="modal-close" onclick="closeModal()">Tutup</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════ DATA ══════════════ */
+var SUBJ = ['Hotel Operations','F&B Service','Housekeeping','Front Office','Event Management','Hospitality Law'];
+var SUBJ_SHORT = ['Hotel Ops','F&B','Housekeeping','Front Office','Event Mgmt','Hosp. Law'];
+var SUBJ_COLORS = ['#f59e0b','#22c55e','#3b82d4','#7c5cd8','#ef4444','#06b6d4'];
+
+var students = [
+  {name:'Ahmad Farid',    matric:'DPH2401',sem:2,attend:95,scores:[88,92,85,90,87,84],grade:'A',status:'Lulus'},
+  {name:'Nurul Ain',      matric:'DPH2402',sem:2,attend:98,scores:[92,95,90,94,93,91],grade:'A+',status:'Lulus'},
+  {name:'Hafizuddin',     matric:'DPH2403',sem:2,attend:90,scores:[80,78,82,79,81,77],grade:'B',status:'Lulus'},
+  {name:'Siti Hajar',     matric:'DPH2404',sem:2,attend:92,scores:[85,88,84,86,83,87],grade:'A-',status:'Lulus'},
+  {name:'Azri Hisham',    matric:'DPH2405',sem:2,attend:87,scores:[76,74,78,75,72,73],grade:'B-',status:'Lulus'},
+  {name:'Farhana Yusof',  matric:'DPH2406',sem:2,attend:93,scores:[90,89,91,88,90,86],grade:'A',status:'Lulus'},
+  {name:'Rizwan Idris',   matric:'DPH2407',sem:2,attend:82,scores:[70,68,72,69,71,66],grade:'C+',status:'Lulus'},
+  {name:'Nurul Hidayah',  matric:'DPH2408',sem:2,attend:96,scores:[94,96,93,95,92,94],grade:'A+',status:'Lulus'},
+  {name:'Izzati Ramli',   matric:'DPH2409',sem:2,attend:88,scores:[78,80,76,79,77,75],grade:'B-',status:'Lulus'},
+  {name:'Syafiq Zulkifli',matric:'DPH2410',sem:2,attend:79,scores:[65,63,67,64,62,61],grade:'C',status:'Lulus'},
+  {name:'Nur Hidayati',   matric:'DPH2411',sem:2,attend:84,scores:[72,75,70,73,71,69],grade:'C+',status:'Lulus'},
+  {name:'Hafiz Kamal',    matric:'DPH2412',sem:2,attend:91,scores:[83,85,82,84,81,80],grade:'B+',status:'Lulus'},
+  {name:'Amirah Salim',   matric:'DPH2413',sem:2,attend:97,scores:[91,93,90,92,89,91],grade:'A',status:'Lulus'},
+  {name:'Zulaikha Noor',  matric:'DPH2414',sem:2,attend:76,scores:[60,58,62,59,57,55],grade:'C-',status:'Lulus'},
+  {name:'Danial Ariff',   matric:'DPH2415',sem:2,attend:89,scores:[77,79,75,78,76,74],grade:'B-',status:'Lulus'},
+  {name:'Farah Nadia',    matric:'DPH2416',sem:2,attend:94,scores:[87,90,86,88,85,87],grade:'A-',status:'Lulus'},
+  {name:'Izzat Hazim',    matric:'DPH2417',sem:2,attend:71,scores:[55,52,57,53,50,48],grade:'D',status:'Ulang'},
+  {name:'Nur Syazwani',   matric:'DPH2418',sem:2,attend:99,scores:[96,98,95,97,96,95],grade:'A+',status:'Lulus'},
+  {name:'Muhamad Syafie', matric:'DPH2419',sem:2,attend:80,scores:[68,66,70,67,65,63],grade:'C',status:'Lulus'},
+  {name:'Aishah Zahari',  matric:'DPH2420',sem:2,attend:85,scores:[74,76,72,75,73,71],grade:'B-',status:'Lulus'},
+  {name:'Haziq Nizam',    matric:'DPH2421',sem:2,attend:68,scores:[48,45,50,46,43,41],grade:'F',status:'Gagal'},
+  {name:'Roslinda Omar',  matric:'DPH2422',sem:2,attend:92,scores:[82,84,80,83,81,79],grade:'B+',status:'Lulus'},
+  {name:'Syamil Azhar',   matric:'DPH2423',sem:2,attend:86,scores:[75,77,73,76,74,72],grade:'B-',status:'Lulus'},
+  {name:'Nik Aisyah',     matric:'DPH2424',sem:2,attend:93,scores:[86,88,85,87,84,86],grade:'A-',status:'Lulus'},
+  {name:'Luqmanul Hakim', matric:'DPH2425',sem:2,attend:62,scores:[44,42,46,43,40,38],grade:'F',status:'Gagal'},
+  {name:'Faizatul Nisa',  matric:'DPH2426',sem:2,attend:90,scores:[81,83,79,82,80,78],grade:'B+',status:'Lulus'},
+  {name:'Harith Imran',   matric:'DPH2427',sem:2,attend:77,scores:[62,60,64,61,59,57],grade:'C-',status:'Lulus'},
+  {name:'Saffiya Husna',  matric:'DPH2428',sem:2,attend:95,scores:[89,91,88,90,87,89],grade:'A-',status:'Lulus'},
+  {name:'Afiq Danial',    matric:'DPH2429',sem:2,attend:83,scores:[71,73,69,72,70,68],grade:'C+',status:'Lulus'},
+  {name:'Adibah Izzati',  matric:'DPH2430',sem:2,attend:96,scores:[93,95,92,94,91,93],grade:'A',status:'Lulus'}
+];
+
+var tasks = [
+  {name:'Quiz Hotel Operations',  due:'15 Feb 2025', status:'Selesai', type:'Quiz'},
+  {name:'Ujian Amali F&B Service',due:'22 Feb 2025', status:'Selesai', type:'Amali'},
+  {name:'Projek Event Management',due:'10 Mac 2025', status:'Berjalan', type:'Projek'},
+  {name:'Laporan Housekeeping',   due:'18 Mac 2025', status:'Semakan', type:'Laporan'},
+  {name:'Pembentangan Front Office',due:'25 Mac 2025',status:'Belum Mula',type:'Pembentangan'},
+  {name:'Final Exam Prep',        due:'30 Apr 2025', status:'Belum Mula',type:'Peperiksaan'},
+  {name:'Portfolio Hospitality',  due:'5 Apr 2025',  status:'Berjalan', type:'Portfolio'},
+  {name:'Site Visit Report',      due:'12 Apr 2025', status:'Belum Mula',type:'Laporan'}
+];
+
+var activities = [
+  {day:8, month:'Mac',  name:'Lawatan Industri — Hilton KL',        loc:'Kuala Lumpur',  type:'visit'},
+  {day:15,month:'Mac',  name:'Ujian Amali Housekeeping',             loc:'Makmal Hotel',  type:'prac'},
+  {day:22,month:'Mac',  name:'Pembentangan Front Office',            loc:'Bilik Kuliah 3',type:'event'},
+  {day:1, month:'Apr',  name:'Kuiz Hospitality Law',                 loc:'Dewan Peperiksaan',type:'exam'},
+  {day:10,month:'Apr',  name:'Industrial Training Briefing',         loc:'Dewan Utama',   type:'train'},
+  {day:20,month:'Apr',  name:'Hotel Simulation — Mock Check-In',     loc:'Makmal Hotel',  type:'prac'},
+  {day:5, month:'Mei',  name:'Peperiksaan Akhir Semester',           loc:'Dewan Peperiksaan',type:'exam'},
+  {day:20,month:'Jun',  name:'Konvokesyen & Majlis Anugerah',        loc:'Dewan Besar',   type:'event'}
+];
+
+var checklist = [
+  {lbl:'Menguasai teknik check-in & check-out',       tag:'Selesai',  color:'#f59e0b', done:true },
+  {lbl:'Lulus ujian amali F&B Service',               tag:'Selesai',  color:'#22c55e', done:true },
+  {lbl:'Siapkan Standard Operating Procedure',        tag:'Selesai',  color:'#22c55e', done:true },
+  {lbl:'Mahir menggunakan PMS Hotel Software',        tag:'Selesai',  color:'#f59e0b', done:true },
+  {lbl:'Lengkapkan log buku latihan industri',        tag:'Berjalan', color:'#d97706', done:false},
+  {lbl:'Lulus semua ujian bertulis (min 60%)',        tag:'Berjalan', color:'#d97706', done:false},
+  {lbl:'Sertai lawatan industri sekurang-kurangnya 1x',tag:'Selesai', color:'#22c55e', done:true },
+  {lbl:'Siapkan portfolio akhir semester',            tag:'Tertunda', color:'#ef4444', done:false},
+  {lbl:'Lulus Peperiksaan Akhir',                     tag:'Akan Datang',color:'#ef4444',done:false},
+  {lbl:'Memenuhi syarat kehadiran (min 80%)',         tag:'Sedang Dipantau',color:'#7c5cd8',done:false}
+];
+
+/* ══════════════ HELPERS ══════════════ */
+function avg(arr){ return arr.length ? Math.round(arr.reduce(function(a,b){return a+b;},0)/arr.length) : 0; }
+function stuAvg(s){ return avg(s.scores); }
+function lv(score){ return score>=80?'exc':score>=65?'good':score>=50?'avg':'low'; }
+function lvC(l){ return {exc:'#16a34a',good:'#3b82d4',avg:'#d97706',low:'#ef4444'}[l]; }
+function lvL(l){ return {exc:'Cemerlang',good:'Baik',avg:'Sederhana',low:'Berisiko'}[l]; }
+function tpClass(s){ return {Selesai:'tp-done',Berjalan:'tp-prog','Belum Mula':'tp-new',Semakan:'tp-rev'}[s]||'tp-new'; }
+function acClass(t){ return {visit:'at-visit',exam:'at-exam',prac:'at-prac',event:'at-event',train:'at-train'}[t]||'at-event'; }
+function getRisk(){ return students.filter(function(s){ return stuAvg(s)<50||s.attend<65; }); }
+function classAvg(){ return avg(students.map(function(s){ return stuAvg(s); })); }
+function countGrp(g){
+  var map={A:['A+','A','A-'],B:['B+','B','B-'],C:['C+','C','C-'],D:['D'],F:['F']};
+  return students.filter(function(s){ return (map[g]||[]).includes(s.grade); }).length;
+}
+
+/* ══════════════ RENDER ══════════════ */
+function renderAll(){
+  renderStats(); renderGradeGrid(); renderTaskSnap(); renderMainChart();
+  renderTable(); renderSubjCards(); renderSubjChart();
+  renderTop5(); renderBIS(); renderAttendTop();
+  renderRisk(); renderTaskFull(); renderActList(); renderChecklist();
+  updateNotif(); updateAlert(); renderCountdown();
+}
+
+/* COUNTDOWN */
+function renderCountdown(){
+  var exam = new Date('2025-05-05');
+  var now  = new Date(); var diff = exam - now;
+  var d = Math.max(0,Math.floor(diff/86400000));
+  var h = Math.max(0,Math.floor((diff%86400000)/3600000));
+  var m = Math.max(0,Math.floor((diff%3600000)/60000));
+  document.getElementById('cdBoxes').innerHTML =
+    cd(d,'Hari') + cd(h,'Jam') + cd(m,'Minit');
+}
+function cd(v,u){ return '<div class="cd-box"><div class="cd-num">'+v+'</div><div class="cd-unit">'+u+'</div></div>'; }
+
+/* STATS */
+function renderStats(){
+  var lulus = students.filter(function(s){ return s.status==='Lulus'; }).length;
+  var risk  = getRisk().length;
+  var ca    = classAvg();
+  var topS  = students.slice().sort(function(a,b){ return stuAvg(b)-stuAvg(a); })[0];
+  document.getElementById('statRow').innerHTML =
+    sc('JUMLAH PELAJAR', students.length, 'Diploma Pengurusan Hotel','c-gold','↑','trend-up') +
+    sc('LULUS',          lulus,           students.length+' pelajar berdaftar','c-green','↑ '+Math.round(lulus/students.length*100)+'%','trend-up') +
+    sc('PURATA KELAS',   ca+'%',          'Keseluruhan 6 subjek','c-blue', ca>=65?'↑ Baik':'↓ Rendah', ca>=65?'trend-up':'trend-dn') +
+    sc('PELAJAR BERISIKO',risk,           'Markah <50 atau hadir <65%','c-red', risk?'↑ Perlu Tindakan':'✓ Selamat', risk?'trend-dn':'trend-up') +
+    sc('PELAJAR CEMERLANG',students.filter(function(s){ return stuAvg(s)>=80; }).length,'Markah purata ≥ 80','c-purple','🌟','trend-up');
+}
+function sc(l,v,d,c,tr,tc){
+  return '<div class="stat-card '+c+'" onclick="showStatModal(\''+l+'\',\''+v+'\',\''+d+'\')"><div class="sc-top"><span class="sc-label">'+l+'</span><span class="sc-trend '+tc+'">'+tr+'</span></div><div class="sc-val">'+v+'</div><div class="sc-desc">'+d+'</div></div>';
+}
+
+/* GRADE GRID */
+function renderGradeGrid(){
+  var a=countGrp('A'),b=countGrp('B'),c=countGrp('C'),d=countGrp('D'),f=countGrp('F');
+  document.getElementById('gradeGrid').innerHTML =
+    gb(a,'Gred A','gA','exc') + gb(b,'Gred B','gB','good') + gb(c,'Gred C','gC','avg') + gb(d,'Gred D','gD','low') + gb(f,'Gagal','gF','low');
+  document.getElementById('gradeTotal').textContent = 'Jumlah: '+students.length+' pelajar berdaftar Semester 2';
+}
+function gb(n,l,cls,fv){ return '<div class="grade-box '+cls+'" onclick="setFAndNav(\''+fv+'\')"><div class="grade-num">'+n+'</div><div class="grade-lbl">'+l+'</div></div>'; }
+
+/* TASK SNAP */
+function renderTaskSnap(){
+  var el=document.getElementById('taskSnap'); el.innerHTML='';
+  tasks.slice(0,5).forEach(function(t){
+    el.innerHTML+='<div class="task-item"><div class="task-info"><div class="task-name">'+t.name+'</div><div class="task-due">📅 '+t.due+' &nbsp;|&nbsp; '+t.type+'</div></div><span class="task-pill '+tpClass(t.status)+'">'+t.status+'</span></div>';
+  });
+}
+
+/* MAIN CHART */
+function renderMainChart(){
+  var sorted=students.slice().sort(function(a,b){ return stuAvg(b)-stuAvg(a); });
+  var W=Math.max(sorted.length*38,400), H=160, pad=28;
+  var svg=document.getElementById('mainChart');
+  svg.setAttribute('width',W); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  var html='';
+  [40,60,80].forEach(function(v){
+    var y=H-pad-(v/100)*(H-pad-10);
+    html+='<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" stroke="#f0f0f0" stroke-width="1"/>';
+    html+='<text x="2" y="'+(y-2)+'" font-size="8" fill="#c4c4c4">'+v+'</text>';
+  });
+  sorted.forEach(function(s,i){
+    var a=stuAvg(s); var l=lv(a); var col=lvC(l);
+    var bh=Math.round((a/100)*(H-pad-10));
+    var x=i*38+6, y=H-pad-bh, bw=26;
+    var idx=students.indexOf(s);
+    html+='<rect class="cbar" x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="3" fill="'+col+'" onclick="openStuModal('+idx+')"/>';
+    html+='<text x="'+(x+bw/2)+'" y="'+(y-3)+'" text-anchor="middle" font-size="8" font-weight="700" fill="'+col+'">'+a+'</text>';
+  });
+  svg.innerHTML=html;
+}
+
+/* STUDENT TABLE */
+var curF='all', sortAsc=false;
+function renderTable(){
+  var body=document.getElementById('stuBody'); body.innerHTML='';
+  var q=(document.getElementById('sfQ')||{value:''}).value.toLowerCase();
+  var sorted=students.slice().sort(function(a,b){ return sortAsc?stuAvg(a)-stuAvg(b):stuAvg(b)-stuAvg(a); });
+  var n=0;
+  sorted.forEach(function(s){
+    var a=stuAvg(s); var l=lv(a); var col=lvC(l);
+    var hide=(curF!=='all'&&l!==curF)||(q&&!(s.name+' '+s.matric).toLowerCase().includes(q));
+    n++;
+    var tr=document.createElement('tr');
+    if(hide) tr.className='hidden';
+    tr.innerHTML='<td style="color:#c4c4c4;font-size:11px">'+n+'</td>'+
+      '<td><div class="stu-nm">'+s.name+'</div><div class="stu-id">'+s.matric+'</div></td>'+
+      '<td style="font-size:12px;color:#57606a">'+s.matric+'</td>'+
+      '<td style="font-size:12px;text-align:center">'+s.sem+'</td>'+
+      '<td><strong style="color:'+col+'">'+a+'%</strong></td>'+
+      '<td style="font-weight:800;color:'+col+'">'+s.grade+'</td>'+
+      '<td><div class="attend-mini"><div class="att-bar"><div class="att-fill" style="width:'+s.attend+'%;background:'+col+'"></div></div><span style="font-size:11px;color:#57606a">'+s.attend+'%</span></div></td>'+
+      '<td><span class="lv-pill" style="background:'+(s.status==='Lulus'?'#16a34a':s.status==='Ulang'?'#d97706':'#ef4444')+'">'+s.status+'</span></td>'+
+      '<td><button class="act-btn" onclick="openStuModal('+students.indexOf(s)+')">Profil</button></td>';
+    document.getElementById('stuBody').appendChild(tr);
+  });
+}
+function sortTable(){ sortAsc=!sortAsc; renderTable(); }
+function setF(f,btn){
+  curF=f;
+  document.querySelectorAll('.fp').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active'); renderTable();
+}
+function setFAndNav(f){
+  curF=f; nav('students');
+  setTimeout(function(){
+    document.querySelectorAll('.fp').forEach(function(p){ p.classList.remove('active'); });
+    var map={exc:'.fExc',good:'.fGood',avg:'.fAvg',low:'.fLow'};
+    var el=document.querySelector(map[f]); if(el) el.classList.add('active');
+    renderTable();
+  },50);
+}
+
+/* SUBJECT CARDS */
+function renderSubjCards(){
+  var el=document.getElementById('subjCards'); el.innerHTML='';
+  SUBJ.forEach(function(sub,i){
+    var scores=students.map(function(s){ return s.scores[i]; });
+    var a=avg(scores);
+    var lulus=scores.filter(function(v){ return v>=50; }).length;
+    var col=SUBJ_COLORS[i];
+    el.innerHTML+='<div class="subj-card" style="border-left-color:'+col+'">'+
+      '<div class="subj-name">'+sub+'</div>'+
+      '<div class="subj-avg" style="color:'+col+'">'+a+'%</div>'+
+      '<div class="subj-bar"><div class="subj-fill" style="width:'+a+'%;background:'+col+'"></div></div>'+
+      '<div class="subj-meta"><span>Lulus: '+lulus+'/'+students.length+'</span><span>Terbaik: '+Math.max.apply(null,scores)+'</span></div></div>';
+  });
+}
+
+/* SUBJECT CHART */
+function renderSubjChart(){
+  var avgs=SUBJ.map(function(sub,i){ return avg(students.map(function(s){ return s.scores[i]; })); });
+  var W=Math.max(SUBJ.length*100,400), H=180, pad=36;
+  var svg=document.getElementById('subjChart');
+  svg.setAttribute('width',W); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  var html='';
+  [40,60,80].forEach(function(v){
+    var y=H-pad-(v/100)*(H-pad-14);
+    html+='<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" stroke="#f0f0f0" stroke-width="1"/>';
+    html+='<text x="2" y="'+(y-2)+'" font-size="9" fill="#c4c4c4">'+v+'</text>';
+  });
+  avgs.forEach(function(a,i){
+    var col=SUBJ_COLORS[i];
+    var bh=Math.round((a/100)*(H-pad-14));
+    var x=i*100+20, y=H-pad-bh, bw=60;
+    html+='<rect class="cbar" x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="4" fill="'+col+'"/>';
+    html+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="10" font-weight="700" fill="'+col+'">'+a+'%</text>';
+    html+='<text x="'+(x+bw/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="#9ca3af">'+SUBJ_SHORT[i]+'</text>';
+  });
+  svg.innerHTML=html;
+}
+
+/* TOP 5 */
+function renderTop5(){
+  var sorted=students.slice().sort(function(a,b){ return stuAvg(b)-stuAvg(a); });
+  var ranks=['r1','r2','r3','r4','r5'], medals=['🥇','🥈','🥉','4','5'];
+  var el=document.getElementById('top5List'); el.innerHTML='';
+  sorted.slice(0,5).forEach(function(s,i){
+    var a=stuAvg(s); var col=lvC(lv(a));
+    el.innerHTML+='<div class="top5-item" style="background:'+(i===0?'#fffbeb':i===1?'#f8fafc':i===2?'#fff7f3':'#fff')+'" onclick="openStuModal('+students.indexOf(s)+')">'+
+      '<div class="top5-rank '+ranks[i]+'">'+(i<3?''+(i+1):i+1)+'</div>'+
+      '<div class="top5-info"><div class="top5-name">'+s.name+'</div><div class="top5-sub">'+s.matric+' | Hadir: '+s.attend+'%</div></div>'+
+      '<div class="top5-score" style="color:'+col+'">'+a+'%</div>'+
+      '<div class="top5-medal">'+(i<3?medals[i]:'')+'</div></div>';
+  });
+}
+
+/* BEST IN SUBJECT */
+function renderBIS(){
+  var el=document.getElementById('bisList'); el.innerHTML='';
+  SUBJ.forEach(function(sub,i){
+    var best=students.slice().sort(function(a,b){ return b.scores[i]-a.scores[i]; })[0];
+    var col=SUBJ_COLORS[i];
+    el.innerHTML+='<div class="bis-item" style="border-left-color:'+col+'">'+
+      '<div><div class="bis-subj">'+sub+'</div><div class="bis-name">'+best.name+'</div></div>'+
+      '<div class="bis-score" style="color:'+col+'">'+best.scores[i]+'%</div></div>';
+  });
+}
+
+/* ATTENDANCE TOP */
+function renderAttendTop(){
+  var sorted=students.slice().sort(function(a,b){ return b.attend-a.attend; });
+  var ranks=['r1','r2','r3','r4','r5'];
+  var el=document.getElementById('attendList'); el.innerHTML='';
+  sorted.slice(0,5).forEach(function(s,i){
+    el.innerHTML+='<div class="top5-item" onclick="openStuModal('+students.indexOf(s)+')">'+
+      '<div class="top5-rank '+ranks[i]+'">'+(i+1)+'</div>'+
+      '<div class="top5-info"><div class="top5-name">'+s.name+'</div><div class="top5-sub">'+s.matric+'</div></div>'+
+      '<div class="top5-score" style="color:#16a34a">'+s.attend+'%</div></div>';
+  });
+}
+
+/* RISK */
+function renderRisk(){
+  var risk=getRisk();
+  document.getElementById('riskAlertTxt').textContent = risk.length+' pelajar memerlukan perhatian segera — markah purata < 50 atau kehadiran < 65%';
+  document.getElementById('riskBadge').textContent = risk.length;
+  var el=document.getElementById('riskList'); el.innerHTML='';
+  if(!risk.length){ el.innerHTML='<p style="color:#16a34a;font-size:13px;padding:10px">✅ Tiada pelajar berisiko pada masa ini.</p>'; return; }
+  risk.forEach(function(s){
+    var a=stuAvg(s);
+    var reasons=[];
+    if(a<50) reasons.push('Markah purata: '+a+'%');
+    if(s.attend<65) reasons.push('Kehadiran: '+s.attend+'%');
+    el.innerHTML+='<div class="risk-item">'+
+      '<div><div class="risk-name">'+s.name+'</div><div class="risk-reason">'+reasons.join(' | ')+'</div></div>'+
+      '<button class="risk-action" onclick="openStuModal('+students.indexOf(s)+')">Lihat Profil</button></div>';
+  });
+}
+
+/* TASK FULL */
+var taskStates=['Selesai','Berjalan','Semakan','Belum Mula'];
+function renderTaskFull(){
+  var el=document.getElementById('taskFull'); el.innerHTML='';
+  tasks.forEach(function(t,i){
+    el.innerHTML+='<div class="task-item">'+
+      '<div class="task-info"><div class="task-name">'+t.name+'</div><div class="task-due">📅 '+t.due+' &nbsp;|&nbsp; Jenis: '+t.type+'</div></div>'+
+      '<span class="task-pill '+tpClass(t.status)+'" data-i="'+i+'" onclick="cycleTask(this)">'+t.status+'</span>'+
+      '<button class="btn btn-ghost" style="margin-left:8px;font-size:11px;padding:4px 8px;" onclick="delTask('+i+')">🗑️</button></div>';
+  });
+}
+function cycleTask(el){
+  var i=parseInt(el.dataset.i);
+  tasks[i].status=taskStates[(taskStates.indexOf(tasks[i].status)+1)%taskStates.length];
+  el.textContent=tasks[i].status; el.className='task-pill '+tpClass(tasks[i].status);
+  renderTaskSnap();
+}
+function delTask(i){ if(!confirm('Padam tugasan ini?')) return; tasks.splice(i,1); renderTaskFull(); renderTaskSnap(); }
+function addTask(){
+  var n=prompt('Nama tugasan:'); if(!n) return;
+  var d=prompt('Tarikh (cth: 20 Apr 2025):'); if(!d) return;
+  var t=prompt('Jenis (Quiz/Amali/Projek/Laporan/Pembentangan):') || 'Tugasan';
+  tasks.push({name:n,due:d,status:'Belum Mula',type:t});
+  renderTaskFull(); renderTaskSnap();
+}
+
+/* ACTIVITIES */
+function renderActList(){
+  var el=document.getElementById('actList'); el.innerHTML='';
+  activities.forEach(function(a,i){
+    el.innerHTML+='<div class="act-item">'+
+      '<div class="act-date"><div class="act-day">'+a.day+'</div><div class="act-month">'+a.month+'</div></div>'+
+      '<div class="act-info"><div class="act-name">'+a.name+'</div><div class="act-loc">📍 '+a.loc+'</div></div>'+
+      '<span class="act-type '+acClass(a.type)+'">'+a.type+'</span>'+
+      '<button class="btn btn-ghost" style="margin-left:8px;font-size:11px;padding:4px 8px;" onclick="delAct('+i+')">🗑️</button></div>';
+  });
+}
+function delAct(i){ if(!confirm('Padam aktiviti?')) return; activities.splice(i,1); renderActList(); }
+function addAct(){
+  var n=prompt('Nama aktiviti:'); if(!n) return;
+  var d=parseInt(prompt('Hari (nombor):')) || 1;
+  var mo=prompt('Bulan:') || 'Jan';
+  var loc=prompt('Lokasi:') || '';
+  activities.push({day:d,month:mo,name:n,loc:loc,type:'event'});
+  renderActList();
+}
+
+/* CHECKLIST */
+function renderChecklist(){
+  var el=document.getElementById('chkList'); el.innerHTML='';
+  checklist.forEach(function(c,i){
+    var row=document.createElement('div');
+    row.className='chk-item'; row.dataset.i=i;
+    row.onclick=function(){ toggleChk(this); };
+    row.innerHTML='<div class="chk-box '+(c.done?'chk-done':'chk-pend')+'">'+(c.done?'✓':'')+'</div>'+
+      '<div class="chk-lbl'+(c.done?' struck':'')+'">'+c.lbl+'</div>'+
+      '<span class="chk-tag" style="background:'+c.color+'">'+c.tag+'</span>'+
+      '<button class="btn btn-ghost" style="margin-left:8px;font-size:10px;padding:2px 7px;" onclick="event.stopPropagation();delChk('+i+')">✕</button>';
+    el.appendChild(row);
+  });
+  updateProg();
+}
+function toggleChk(row){
+  var i=parseInt(row.dataset.i); checklist[i].done=!checklist[i].done;
+  var box=row.querySelector('.chk-box'), lbl=row.querySelector('.chk-lbl');
+  box.className='chk-box '+(checklist[i].done?'chk-done':'chk-pend');
+  box.textContent=checklist[i].done?'✓':''; lbl.className='chk-lbl'+(checklist[i].done?' struck':'');
+  updateProg();
+}
+function updateProg(){
+  var total=checklist.length, done=checklist.filter(function(c){ return c.done; }).length;
+  var pct=total?Math.round(done/total*100):0;
+  document.getElementById('pFill').style.width=pct+'%';
+  document.getElementById('pTxt').innerHTML='📊 Kompetensi: <strong style="color:#d97706">'+done+' daripada '+total+'</strong> — '+pct+'% dikuasai';
+}
+function delChk(i){ if(!confirm('Padam item?')) return; checklist.splice(i,1); renderChecklist(); }
+function addChk(){
+  var l=prompt('Item kompetensi:'); if(!l) return;
+  checklist.push({lbl:l,tag:'Baru',color:'#d97706',done:false});
+  renderChecklist();
+}
+
+/* ALERTS & NOTIF */
+function updateAlert(){
+  var risk=getRisk();
+  var bar=document.getElementById('alertBar');
+  if(risk.length){ bar.classList.remove('hidden'); document.getElementById('alertTxt').textContent='⚠️ '+risk.length+' pelajar memerlukan perhatian: '+risk.map(function(s){ return s.name; }).join(', '); }
+  else { bar.classList.add('hidden'); }
+}
+function updateNotif(){
+  var risk=getRisk();
+  var el=document.getElementById('notifBody'); el.innerHTML='';
+  document.getElementById('nDot').style.display=risk.length?'':'none';
+  if(!risk.length){ el.innerHTML='<div class="notif-item"><span>✅ Tiada pelajar berisiko.</span></div>'; return; }
+  risk.forEach(function(s){
+    el.innerHTML+='<div class="notif-item"><strong>'+s.name+' ('+s.matric+')</strong><span>Avg: '+stuAvg(s)+'% | Hadir: '+s.attend+'%</span></div>';
+  });
+  var upcoming=tasks.filter(function(t){ return t.status==='Belum Mula'; });
+  if(upcoming.length) el.innerHTML+='<div class="notif-item"><strong>📝 '+upcoming.length+' tugasan belum dimulakan</strong><span>Semak halaman tugasan.</span></div>';
+}
+function toggleNotif(){
+  document.getElementById('notifPanel').classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.notif-panel')&&!e.target.closest('.notif-wrap')) document.getElementById('notifPanel').classList.remove('open');
+});
+
+/* EDIT STUDENT */
+var editOn=false;
+function toggleEdit(){
+  editOn=!editOn;
+  var btn=document.getElementById('editBtn');
+  btn.textContent=editOn?'✏️ Edit: ON':'✏️ Edit Data';
+  btn.classList.toggle('on',editOn);
+  var p=document.getElementById('editPanel');
+  if(editOn){ p.classList.add('open'); nav('students'); populateSel(); }
+  else { p.classList.remove('open'); }
+}
+function populateSel(){
+  var sel=document.getElementById('eSel'); var prev=sel.value; sel.innerHTML='';
+  students.forEach(function(s,i){ var o=document.createElement('option'); o.value=i; o.textContent=s.name+' ('+s.matric+')'; sel.appendChild(o); });
+  sel.value=prev<students.length?prev:0; loadStu();
+}
+function loadStu(){
+  var i=parseInt(document.getElementById('eSel').value); if(isNaN(i)||!students[i]) return;
+  var s=students[i];
+  document.getElementById('eN').value=s.name;
+  document.getElementById('eM').value=s.matric;
+  document.getElementById('eSm').value=s.sem;
+  document.getElementById('eAt').value=s.attend;
+  s.scores.forEach(function(v,j){ var el=document.getElementById('eS'+(j+1)); if(el) el.value=v; });
+  document.getElementById('eG').value=s.grade;
+  document.getElementById('eSt').value=s.status;
+}
+function saveStu(){
+  var i=parseInt(document.getElementById('eSel').value); if(isNaN(i)) return;
+  var sc=[];
+  for(var j=1;j<=6;j++){ sc.push(Math.min(100,Math.max(0,parseInt(document.getElementById('eS'+j).value)||0))); }
+  students[i]={
+    name:document.getElementById('eN').value.trim()||students[i].name,
+    matric:document.getElementById('eM').value.trim()||students[i].matric,
+    sem:parseInt(document.getElementById('eSm').value)||2,
+    attend:Math.min(100,Math.max(0,parseInt(document.getElementById('eAt').value)||0)),
+    scores:sc, grade:document.getElementById('eG').value, status:document.getElementById('eSt').value
+  };
+  renderAll(); populateSel(); alert('✅ Data pelajar disimpan!');
+}
+function delStu(){
+  var i=parseInt(document.getElementById('eSel').value);
+  if(isNaN(i)||students.length<=1){ alert('Tidak boleh padam pelajar terakhir.'); return; }
+  if(!confirm('Padam '+students[i].name+'?')) return;
+  students.splice(i,1); renderAll(); populateSel();
+}
+function addStu(){
+  students.push({name:'Pelajar Baru',matric:'DPH24'+(students.length+1),sem:2,attend:80,scores:[70,70,70,70,70,70],grade:'C',status:'Lulus'});
+  renderAll(); populateSel();
+  document.getElementById('eSel').value=students.length-1; loadStu();
+}
+
+/* STUDENT MODAL */
+function openStuModal(i){
+  var s=students[i]; var a=stuAvg(s); var col=lvC(lv(a));
+  document.getElementById('mTop').textContent='🏨';
+  document.getElementById('mName').textContent=s.name;
+  document.getElementById('mRole').textContent=s.matric+' | Semester '+s.sem+' | '+s.status;
+  document.getElementById('mScore').textContent=a+'%';
+  document.getElementById('mScore').style.color=col;
+  document.getElementById('mGrade').textContent='Gred: '+s.grade+' | Kehadiran: '+s.attend+'%';
+  var grid='';
+  SUBJ.forEach(function(sub,j){ grid+='<div class="modal-kv"><div class="modal-k">'+sub+'</div><div class="modal-v" style="color:'+SUBJ_COLORS[j]+'">'+s.scores[j]+'%</div></div>'; });
+  document.getElementById('mGrid').innerHTML=grid;
+  document.getElementById('overlay').classList.add('open');
+}
+function showStatModal(l,v,d){
+  document.getElementById('mTop').textContent='📊';
+  document.getElementById('mName').textContent=l;
+  document.getElementById('mRole').textContent=d;
+  document.getElementById('mScore').textContent=v;
+  document.getElementById('mScore').style.color='#f59e0b';
+  document.getElementById('mGrade').textContent='';
+  document.getElementById('mGrid').innerHTML='';
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeModal(); document.getElementById('notifPanel').classList.remove('open'); } });
+
+/* NAVIGATION */
+var PAGES={main:'Dashboard Utama',students:'Senarai Pelajar',subjects:'Prestasi Subjek',ranking:'Ranking & Anugerah',risk:'Pelajar Berisiko',tasks:'Tugasan & Penilaian',activities:'Jadual & Aktiviti',checklist:'Checklist Kompetensi'};
+var SUBS={main:'Diploma Pengurusan Hotel — Gambaran Keseluruhan',students:'Senarai & profil pelajar',subjects:'Analisis markah mengikut subjek',ranking:'Pelajar terbaik & anugerah',risk:'Pelajar memerlukan perhatian',tasks:'Pengurusan tugasan & penilaian',activities:'Jadual aktiviti & acara',checklist:'Kompetensi hotel yang dikuasai'};
+function nav(name){
+  document.querySelectorAll('.page-section').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('pg-'+name).classList.add('active');
+  document.getElementById('pgTitle').textContent=PAGES[name]||name;
+  document.getElementById('pgSub').textContent=SUBS[name]||'';
+  var order=['main','students','subjects','ranking','risk','tasks','activities','checklist'];
+  var idx=order.indexOf(name);
+  var items=document.querySelectorAll('.nav-item');
+  if(items[idx]) items[idx].classList.add('active');
+  if(name==='subjects'){ renderSubjChart(); }
+}
+
+/* INIT */
+renderAll();
+setInterval(renderCountdown, 60000);
+</script>
+</body>
+</html>
