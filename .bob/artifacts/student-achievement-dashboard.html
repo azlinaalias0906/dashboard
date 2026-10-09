@@ -1,0 +1,625 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student Achievement Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: #f0f2f5;
+    color: #1f2328;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 24px 16px 40px;
+  }
+  .page { max-width: 780px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2328;
+    letter-spacing: -0.3px;
+  }
+  .header p {
+    color: #57606a;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  /* Summary Stats Row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-box {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .stat-box .stat-val {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3b82d4;
+  }
+  .stat-box .stat-label {
+    font-size: 11px;
+    color: #57606a;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* Cards */
+  .cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f2328;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .card-title .icon {
+    font-size: 16px;
+  }
+
+  /* Student Marks */
+  .marks-list { display: flex; flex-direction: column; gap: 9px; }
+  .mark-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mark-name {
+    width: 70px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bar-wrap {
+    flex: 1;
+    background: #f0f2f5;
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 20px;
+  }
+  .mark-score {
+    width: 32px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* Assessment Tasks */
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+  .task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: #f7f8fa;
+    font-size: 12px;
+  }
+  .task-name { font-weight: 600; flex: 1; }
+  .task-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    color: #fff;
+    margin-left: 8px;
+  }
+
+  /* Grading Status */
+  .grade-list { display: flex; flex-direction: column; gap: 8px; }
+  .grade-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    background: #f7f8fa;
+    font-size: 12px;
+  }
+  .grade-name { font-weight: 600; }
+  .grade-letter {
+    font-size: 15px;
+    font-weight: 800;
+  }
+  .grade-status { font-size: 11px; color: #57606a; }
+
+  /* Color levels */
+  .clr-excellent { background: #22c55e; }
+  .clr-good      { background: #3b82d4; }
+  .clr-average   { background: #f59e0b; }
+  .clr-below     { background: #ef4444; }
+
+  .txt-excellent { color: #16a34a; }
+  .txt-good      { color: #3b82d4; }
+  .txt-average   { color: #d97706; }
+  .txt-below     { color: #ef4444; }
+
+  .bg-excellent { background: #22c55e; }
+  .bg-good      { background: #3b82d4; }
+  .bg-average   { background: #f59e0b; }
+  .bg-below     { background: #ef4444; }
+
+  .border-excellent { border-color: #22c55e; }
+  .border-good      { border-color: #3b82d4; }
+  .border-average   { border-color: #f59e0b; }
+  .border-below     { border-color: #ef4444; }
+
+  /* Bottom row */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* Top 3 */
+  .top3-list { display: flex; flex-direction: column; gap: 10px; }
+  .top3-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #f7f8fa;
+  }
+  .rank-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .rank-1 { background: #f59e0b; }
+  .rank-2 { background: #9ca3af; }
+  .rank-3 { background: #cd7c4f; }
+  .top3-info { flex: 1; }
+  .top3-name { font-weight: 700; font-size: 13px; }
+  .top3-sub  { font-size: 11px; color: #57606a; }
+  .top3-score {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1f2328;
+  }
+  .top3-ach { font-size: 18px; }
+
+  /* Checklist */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: #f7f8fa;
+  }
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+  .check-done {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: #fff;
+  }
+  .check-pending {
+    background: #fff;
+    border-color: #d1d5db;
+    color: transparent;
+  }
+  .check-label { flex: 1; color: #1f2328; }
+  .check-label.done { text-decoration: line-through; color: #9ca3af; }
+  .check-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    color: #fff;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 18px;
+    padding: 10px 0;
+    border-top: 1px solid #e5e7eb;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #57606a;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 14px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="header">
+    <h1>🎓 Student Achievement Dashboard</h1>
+    <p>Academic Year 2024 – 2025  |  Class 10-A  |  10 Students</p>
+  </div>
+
+  
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-val">78%</div>
+      <div class="stat-label">Class Average</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:#22c55e">4</div>
+      <div class="stat-label">Excellent</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:#f59e0b">4</div>
+      <div class="stat-label">Average</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:#ef4444">2</div>
+      <div class="stat-label">Need Support</div>
+    </div>
+  </div>
+
+  
+  <div class="cards-row">
+
+    
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> Student Marks</div>
+      <div class="marks-list">
+        <div class="mark-row">
+          <div class="mark-name">Aiden</div>
+          <div class="bar-wrap"><div class="bar-fill clr-excellent" style="width:96%"></div></div>
+          <div class="mark-score txt-excellent">96</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">Sofia</div>
+          <div class="bar-wrap"><div class="bar-fill clr-excellent" style="width:91%"></div></div>
+          <div class="mark-score txt-excellent">91</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">Liam</div>
+          <div class="bar-wrap"><div class="bar-fill clr-excellent" style="width:88%"></div></div>
+          <div class="mark-score txt-excellent">88</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">Mia</div>
+          <div class="bar-wrap"><div class="bar-fill clr-good" style="width:82%"></div></div>
+          <div class="mark-score txt-good">82</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">Noah</div>
+          <div class="bar-wrap"><div class="bar-fill clr-good" style="width:79%"></div></div>
+          <div class="mark-score txt-good">79</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">Ella</div>
+          <div class="bar-wrap"><div class="bar-fill clr-average" style="width:74%"></div></div>
+          <div class="mark-score txt-average">74</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">James</div>
+          <div class="bar-wrap"><div class="bar-fill clr-average" style="width:70%"></div></div>
+          <div class="mark-score txt-average">70</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">Olivia</div>
+          <div class="bar-wrap"><div class="bar-fill clr-average" style="width:65%"></div></div>
+          <div class="mark-score txt-average">65</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">Lucas</div>
+          <div class="bar-wrap"><div class="bar-fill clr-below" style="width:55%"></div></div>
+          <div class="mark-score txt-below">55</div>
+        </div>
+        <div class="mark-row">
+          <div class="mark-name">Emma</div>
+          <div class="bar-wrap"><div class="bar-fill clr-below" style="width:48%"></div></div>
+          <div class="mark-score txt-below">48</div>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="card">
+      <div class="card-title"><span class="icon">📝</span> Assessment Tasks</div>
+      <div class="task-list">
+        <div class="task-item">
+          <div class="task-name">Mathematics Quiz</div>
+          <span class="task-badge bg-excellent">Done</span>
+        </div>
+        <div class="task-item">
+          <div class="task-name">Science Report</div>
+          <span class="task-badge bg-excellent">Done</span>
+        </div>
+        <div class="task-item">
+          <div class="task-name">English Essay</div>
+          <span class="task-badge bg-good">Done</span>
+        </div>
+        <div class="task-item">
+          <div class="task-name">History Project</div>
+          <span class="task-badge bg-good">Done</span>
+        </div>
+        <div class="task-item">
+          <div class="task-name">Oral Presentation</div>
+          <span class="task-badge bg-average">In Progress</span>
+        </div>
+        <div class="task-item">
+          <div class="task-name">Group Assignment</div>
+          <span class="task-badge bg-average">In Progress</span>
+        </div>
+        <div class="task-item">
+          <div class="task-name">Lab Experiment</div>
+          <span class="task-badge bg-below">Pending</span>
+        </div>
+        <div class="task-item">
+          <div class="task-name">Final Exam</div>
+          <span class="task-badge bg-below">Pending</span>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="card">
+      <div class="card-title"><span class="icon">🎓</span> Grading Status</div>
+      <div class="grade-list">
+        <div class="grade-item border-excellent">
+          <div>
+            <div class="grade-name">Aiden</div>
+            <div class="grade-status">Excellent ⭐</div>
+          </div>
+          <div class="grade-letter txt-excellent">A+</div>
+        </div>
+        <div class="grade-item border-excellent">
+          <div>
+            <div class="grade-name">Sofia</div>
+            <div class="grade-status">Excellent ⭐</div>
+          </div>
+          <div class="grade-letter txt-excellent">A</div>
+        </div>
+        <div class="grade-item border-excellent">
+          <div>
+            <div class="grade-name">Liam</div>
+            <div class="grade-status">Excellent ⭐</div>
+          </div>
+          <div class="grade-letter txt-excellent">A</div>
+        </div>
+        <div class="grade-item border-good">
+          <div>
+            <div class="grade-name">Mia</div>
+            <div class="grade-status">Good 👍</div>
+          </div>
+          <div class="grade-letter txt-good">B+</div>
+        </div>
+        <div class="grade-item border-good">
+          <div>
+            <div class="grade-name">Noah</div>
+            <div class="grade-status">Good 👍</div>
+          </div>
+          <div class="grade-letter txt-good">B</div>
+        </div>
+        <div class="grade-item border-average">
+          <div>
+            <div class="grade-name">Ella</div>
+            <div class="grade-status">Average 😐</div>
+          </div>
+          <div class="grade-letter txt-average">C+</div>
+        </div>
+        <div class="grade-item border-average">
+          <div>
+            <div class="grade-name">James</div>
+            <div class="grade-status">Average 😐</div>
+          </div>
+          <div class="grade-letter txt-average">C</div>
+        </div>
+        <div class="grade-item border-average">
+          <div>
+            <div class="grade-name">Olivia</div>
+            <div class="grade-status">Average 😐</div>
+          </div>
+          <div class="grade-letter txt-average">C</div>
+        </div>
+        <div class="grade-item border-below">
+          <div>
+            <div class="grade-name">Lucas</div>
+            <div class="grade-status">Needs Support 🚨</div>
+          </div>
+          <div class="grade-letter txt-below">D</div>
+        </div>
+        <div class="grade-item border-below">
+          <div>
+            <div class="grade-name">Emma</div>
+            <div class="grade-status">Needs Support 🚨</div>
+          </div>
+          <div class="grade-letter txt-below">F</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="bottom-row">
+
+    
+    <div class="card">
+      <div class="card-title"><span class="icon">🏆</span> Top 3 Students</div>
+      <div class="top3-list">
+        <div class="top3-item" style="background:#fffbeb;border-color:#fde68a">
+          <div class="rank-badge rank-1">1</div>
+          <div class="top3-info">
+            <div class="top3-name">Aiden Carter</div>
+            <div class="top3-sub">Score: 96  |  Grade: A+</div>
+          </div>
+          <div class="top3-score">96</div>
+          <div class="top3-ach">🏋</div>
+        </div>
+        <div class="top3-item" style="background:#f8fafc;border-color:#cbd5e1">
+          <div class="rank-badge rank-2">2</div>
+          <div class="top3-info">
+            <div class="top3-name">Sofia Mendez</div>
+            <div class="top3-sub">Score: 91  |  Grade: A</div>
+          </div>
+          <div class="top3-score">91</div>
+          <div class="top3-ach">🥇</div>
+        </div>
+        <div class="top3-item" style="background:#fff7f3;border-color:#fed7aa">
+          <div class="rank-badge rank-3">3</div>
+          <div class="top3-info">
+            <div class="top3-name">Liam Johnson</div>
+            <div class="top3-sub">Score: 88  |  Grade: A</div>
+          </div>
+          <div class="top3-score">88</div>
+          <div class="top3-ach">🥈</div>
+        </div>
+      </div>
+
+      
+      <div style="margin-top:14px;border-top:1px solid #e5e7eb;padding-top:12px">
+        <div style="font-size:11px;font-weight:700;color:#57606a;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px">Achievement Icons</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;background:#f7f8fa;border:1px solid #e5e7eb;padding:4px 10px;border-radius:20px">⭐ Excellent (90–100)</span>
+          <span style="font-size:12px;background:#f7f8fa;border:1px solid #e5e7eb;padding:4px 10px;border-radius:20px">👍 Good (80–89)</span>
+          <span style="font-size:12px;background:#f7f8fa;border:1px solid #e5e7eb;padding:4px 10px;border-radius:20px">😐 Average (60–79)</span>
+          <span style="font-size:12px;background:#f7f8fa;border:1px solid #e5e7eb;padding:4px 10px;border-radius:20px">🚨 Needs Support (&lt;60)</span>
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="card">
+      <div class="card-title"><span class="icon">✅</span> Achievement Checklist</div>
+      <div class="checklist">
+        <div class="check-item">
+          <div class="check-box check-done">✓</div>
+          <div class="check-label done">Submit all homework on time</div>
+          <span class="check-tag" style="background:#22c55e">Done</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box check-done">✓</div>
+          <div class="check-label done">Complete Mathematics Quiz</div>
+          <span class="check-tag" style="background:#22c55e">Done</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box check-done">✓</div>
+          <div class="check-label done">Pass mid-term assessment</div>
+          <span class="check-tag" style="background:#22c55e">Done</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box check-done">✓</div>
+          <div class="check-label done">Achieve grade B or above</div>
+          <span class="check-tag" style="background:#3b82d4">Top 5</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box check-done">✓</div>
+          <div class="check-label done">Participate in group activity</div>
+          <span class="check-tag" style="background:#22c55e">Done</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box check-pending"></div>
+          <div class="check-label">Complete oral presentation</div>
+          <span class="check-tag" style="background:#f59e0b">Ongoing</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box check-pending"></div>
+          <div class="check-label">Submit final lab report</div>
+          <span class="check-tag" style="background:#f59e0b">Pending</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box check-pending"></div>
+          <div class="check-label">Pass final examination</div>
+          <span class="check-tag" style="background:#ef4444">Upcoming</span>
+        </div>
+        <div class="check-item">
+          <div class="check-box check-pending"></div>
+          <div class="check-label">Achieve class top ranking</div>
+          <span class="check-tag" style="background:#7c5cd8">Goal</span>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:#f7f8fa;border-radius:8px;padding:8px 12px;font-size:12px;color:#57606a">
+        📊 Progress: <strong style="color:#22c55e">5 of 9</strong> achievements completed  •  <strong>56%</strong> complete
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Excellent (90–100)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82d4"></div> Good (80–89)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Average (60–79)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Needs Support (&lt;60)</div>
+  </div>
+
+</div>
+<footer>Made with IBM Bob</footer>
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Achievement Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: #f0f2f5;
+    color: #1f2328;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 24px 16px 40px;
+  }
+  .page { max-width: 860px; margin: 0 auto; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 20px; }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .header p  { color: #57606a; font-size: 13px; margin-top: 4px; }
+
+  /* Filter Bar */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: center; margin-bottom: 20px;
+  }
+  .filter-btn {
+    padding: 7px 18px; border-radius: 20px; border: 2px solid #e5e7eb;
+    background: #fff; font-size: 12px; font-weight: 600;
+    cursor: pointer; color: #57606a; transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: #3b82d4; color: #3b82d4; }
+  .filter-btn.active { color: #fff; border-color: transparent; }
+  .filter-btn.f-all.active  { background: #1f2328; }
+  .filter-btn.f-exc.active  { background: #22c55e; }
+  .filter-btn.f-good.active { background: #3b82d4; }
+  .filter-btn.f-avg.active  { background: #f59e0b; }
+  .filter-btn.f-low.active  { background: #ef4444; }
+
+  /* Stats Row */
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-box {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+    padding: 14px 12px; text-align: center;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .stat-val   { font-size: 24px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: #57606a; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* Cards Row */
+  .cards-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+  .card-title {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+    margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title .left { display: flex; align-items: center; gap: 6px; }
+
+  .sort-btn {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px;
+    border: 1px solid #e5e7eb; background: #f7f8fa;
+    cursor: pointer; color: #57606a; font-weight: 600; transition: background 0.15s;
+  }
+  .sort-btn:hover { background: #e5e7eb; }
+
+  /* Marks */
+  .marks-list { display: flex; flex-direction: column; gap: 9px; }
+  .mark-row { display: flex; align-items: center; gap: 8px; }
+  .mark-row.hidden { display: none; }
+  .mark-name { width: 68px; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-wrap   { flex: 1; background: #f0f2f5; border-radius: 20px; height: 8px; overflow: hidden; }
+  .bar-fill   { height: 100%; border-radius: 20px; transition: width 0.5s ease; }
+  .mark-score { width: 30px; text-align: right; font-size: 12px; font-weight: 700; }
+
+  /* Tasks */
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+  .task-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; border-radius: 8px; background: #f7f8fa; font-size: 12px;
+  }
+  .task-name { font-weight: 600; flex: 1; }
+  .task-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; color: #fff; margin-left: 8px;
+    cursor: pointer; transition: opacity 0.15s; user-select: none;
+  }
+  .task-badge:hover { opacity: 0.78; }
+  .hint { margin-top: 10px; font-size: 11px; color: #9ca3af; text-align: center; }
+
+  /* Grades */
+  .grade-list { display: flex; flex-direction: column; gap: 8px; }
+  .grade-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; border-radius: 8px; border-left: 4px solid;
+    background: #f7f8fa; font-size: 12px; transition: background 0.15s;
+  }
+  .grade-item.hidden { display: none; }
+  .grade-item:hover  { background: #eef2f7; }
+  .grade-name   { font-weight: 600; }
+  .grade-letter { font-size: 15px; font-weight: 800; }
+  .grade-status { font-size: 11px; color: #57606a; }
+
+  /* Color helpers */
+  .clr-exc  { background: #22c55e; } .txt-exc  { color: #16a34a; } .brd-exc  { border-color: #22c55e; }
+  .clr-good { background: #3b82d4; } .txt-good { color: #3b82d4; } .brd-good { border-color: #3b82d4; }
+  .clr-avg  { background: #f59e0b; } .txt-avg  { color: #d97706; } .brd-avg  { border-color: #f59e0b; }
+  .clr-low  { background: #ef4444; } .txt-low  { color: #ef4444; } .brd-low  { border-color: #ef4444; }
+
+  /* Bottom Row */
+  .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Top 3 */
+  .top3-list { display: flex; flex-direction: column; gap: 10px; }
+  .top3-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 10px; border: 1px solid #e5e7eb;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .top3-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.09); }
+  .rank-badge {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px; color: #fff; flex-shrink: 0;
+  }
+  .r1 { background: #f59e0b; }
+  .r2 { background: #9ca3af; }
+  .r3 { background: #cd7c4f; }
+  .top3-info  { flex: 1; }
+  .top3-name  { font-weight: 700; font-size: 13px; }
+  .top3-sub   { font-size: 11px; color: #57606a; }
+  .top3-score { font-size: 18px; font-weight: 800; }
+  .top3-ach   { font-size: 18px; }
+  .ach-section { margin-top: 14px; border-top: 1px solid #e5e7eb; padding-top: 12px; }
+  .ach-title   { font-size: 11px; font-weight: 700; color: #57606a; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+  .ach-pills   { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ach-pill    { font-size: 12px; background: #f7f8fa; border: 1px solid #e5e7eb; padding: 4px 10px; border-radius: 20px; }
+
+  /* Checklist */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; padding: 7px 10px; border-radius: 8px;
+    background: #f7f8fa; cursor: pointer; user-select: none; transition: background 0.15s;
+  }
+  .check-item:hover { background: #eef2f7; }
+  .check-box {
+    width: 18px; height: 18px; border-radius: 4px; border: 2px solid #d1d5db;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0; font-weight: 700; transition: all 0.15s;
+  }
+  .done-box  { background: #22c55e; border-color: #22c55e; color: #fff; }
+  .pend-box  { background: #fff; color: transparent; }
+  .check-label { flex: 1; color: #1f2328; transition: all 0.15s; }
+  .striked     { text-decoration: line-through; color: #9ca3af; }
+  .check-tag   { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; color: #fff; white-space: nowrap; }
+  .progress-wrap { margin-top: 12px; background: #f0f2f5; border-radius: 20px; height: 8px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 20px; background: #22c55e; transition: width 0.4s ease; }
+  .progress-text { margin-top: 6px; font-size: 12px; color: #57606a; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    margin-top: 18px; padding: 10px 0; border-top: 1px solid #e5e7eb;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #57606a; }
+  .legend-dot  { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Modal */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 14px; padding: 26px 24px;
+    max-width: 340px; width: 92%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    text-align: center;
+  }
+  .modal-icon  { font-size: 36px; margin-bottom: 8px; }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .modal-desc  { font-size: 13px; color: #57606a; margin-bottom: 14px; }
+  .modal-stat  { font-size: 40px; font-weight: 800; margin: 8px 0 14px; }
+  .modal-btn {
+    display: block; width: 100%; padding: 10px;
+    background: #1f2328; color: #fff; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  }
+  .modal-btn:hover { background: #3b82d4; }
+
+  footer {
+    text-align: center; margin-top: 32px; padding-top: 14px;
+    border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🎓 Student Achievement Dashboard</h1>
+    <p>Academic Year 2024–2025 &nbsp;|&nbsp; Class 10-A &nbsp;|&nbsp; <span id="countLabel">10</span> Students Shown</p>
+  </div>
+
+  <!-- Filter Buttons -->
+  <div class="filter-bar">
+    <button class="filter-btn f-all active" onclick="filterStudents('all')">🔍 All Students</button>
+    <button class="filter-btn f-exc"        onclick="filterStudents('exc')">⭐ Excellent</button>
+    <button class="filter-btn f-good"       onclick="filterStudents('good')">👍 Good</button>
+    <button class="filter-btn f-avg"        onclick="filterStudents('avg')">😐 Average</button>
+    <button class="filter-btn f-low"        onclick="filterStudents('low')">🚨 Needs Support</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box" onclick="showModal('📊','Class Average Score','Overall average across all 10 students.','78%')">
+      <div class="stat-val" style="color:#3b82d4;">78%</div>
+      <div class="stat-label">Class Average</div>
+    </div>
+    <div class="stat-box" onclick="showModal('⭐','Excellent Students','Students who scored 90 or above.','4')">
+      <div class="stat-val" style="color:#22c55e;">4</div>
+      <div class="stat-label">Excellent</div>
+    </div>
+    <div class="stat-box" onclick="showModal('😐','Average Students','Students who scored between 60–79.','4')">
+      <div class="stat-val" style="color:#f59e0b;">4</div>
+      <div class="stat-label">Average</div>
+    </div>
+    <div class="stat-box" onclick="showModal('🚨','Need Support','Students who scored below 60.','2')">
+      <div class="stat-val" style="color:#ef4444;">2</div>
+      <div class="stat-label">Need Support</div>
+    </div>
+  </div>
+
+  <!-- Three Main Cards -->
+  <div class="cards-row">
+
+    <!-- Card 1: Marks -->
+    <div class="card">
+      <div class="card-title">
+        <div class="left">📋 Student Marks</div>
+        <button class="sort-btn" onclick="sortMarks()">⇅ Sort</button>
+      </div>
+      <div class="marks-list" id="marksList">
+        <div class="mark-row" data-level="exc" data-score="96"><div class="mark-name">Aiden</div><div class="bar-wrap"><div class="bar-fill clr-exc" style="width:96%"></div></div><div class="mark-score txt-exc">96</div></div>
+        <div class="mark-row" data-level="exc" data-score="91"><div class="mark-name">Sofia</div><div class="bar-wrap"><div class="bar-fill clr-exc" style="width:91%"></div></div><div class="mark-score txt-exc">91</div></div>
+        <div class="mark-row" data-level="exc" data-score="88"><div class="mark-name">Liam</div><div class="bar-wrap"><div class="bar-fill clr-exc" style="width:88%"></div></div><div class="mark-score txt-exc">88</div></div>
+        <div class="mark-row" data-level="good" data-score="82"><div class="mark-name">Mia</div><div class="bar-wrap"><div class="bar-fill clr-good" style="width:82%"></div></div><div class="mark-score txt-good">82</div></div>
+        <div class="mark-row" data-level="good" data-score="79"><div class="mark-name">Noah</div><div class="bar-wrap"><div class="bar-fill clr-good" style="width:79%"></div></div><div class="mark-score txt-good">79</div></div>
+        <div class="mark-row" data-level="avg" data-score="74"><div class="mark-name">Ella</div><div class="bar-wrap"><div class="bar-fill clr-avg" style="width:74%"></div></div><div class="mark-score txt-avg">74</div></div>
+        <div class="mark-row" data-level="avg" data-score="70"><div class="mark-name">James</div><div class="bar-wrap"><div class="bar-fill clr-avg" style="width:70%"></div></div><div class="mark-score txt-avg">70</div></div>
+        <div class="mark-row" data-level="avg" data-score="65"><div class="mark-name">Olivia</div><div class="bar-wrap"><div class="bar-fill clr-avg" style="width:65%"></div></div><div class="mark-score txt-avg">65</div></div>
+        <div class="mark-row" data-level="low" data-score="55"><div class="mark-name">Lucas</div><div class="bar-wrap"><div class="bar-fill clr-low" style="width:55%"></div></div><div class="mark-score txt-low">55</div></div>
+        <div class="mark-row" data-level="low" data-score="48"><div class="mark-name">Emma</div><div class="bar-wrap"><div class="bar-fill clr-low" style="width:48%"></div></div><div class="mark-score txt-low">48</div></div>
+      </div>
+    </div>
+
+    <!-- Card 2: Assessment Tasks -->
+    <div class="card">
+      <div class="card-title"><div class="left">📝 Assessment Tasks</div></div>
+      <div class="task-list">
+        <div class="task-item"><div class="task-name">Mathematics Quiz</div>   <span class="task-badge" style="background:#22c55e" onclick="cycleTask(this)">Done</span></div>
+        <div class="task-item"><div class="task-name">Science Report</div>      <span class="task-badge" style="background:#22c55e" onclick="cycleTask(this)">Done</span></div>
+        <div class="task-item"><div class="task-name">English Essay</div>       <span class="task-badge" style="background:#3b82d4" onclick="cycleTask(this)">Done</span></div>
+        <div class="task-item"><div class="task-name">History Project</div>     <span class="task-badge" style="background:#3b82d4" onclick="cycleTask(this)">Done</span></div>
+        <div class="task-item"><div class="task-name">Oral Presentation</div>   <span class="task-badge" style="background:#f59e0b" onclick="cycleTask(this)">In Progress</span></div>
+        <div class="task-item"><div class="task-name">Group Assignment</div>    <span class="task-badge" style="background:#f59e0b" onclick="cycleTask(this)">In Progress</span></div>
+        <div class="task-item"><div class="task-name">Lab Experiment</div>      <span class="task-badge" style="background:#ef4444" onclick="cycleTask(this)">Pending</span></div>
+        <div class="task-item"><div class="task-name">Final Exam</div>          <span class="task-badge" style="background:#ef4444" onclick="cycleTask(this)">Pending</span></div>
+      </div>
+      <p class="hint">💡 Click a badge to cycle its status</p>
+    </div>
+
+    <!-- Card 3: Grading Status -->
+    <div class="card">
+      <div class="card-title"><div class="left">🎓 Grading Status</div></div>
+      <div class="grade-list">
+        <div class="grade-item brd-exc" data-level="exc"><div><div class="grade-name">Aiden</div><div class="grade-status">Excellent ⭐</div></div><div class="grade-letter txt-exc">A+</div></div>
+        <div class="grade-item brd-exc" data-level="exc"><div><div class="grade-name">Sofia</div><div class="grade-status">Excellent ⭐</div></div><div class="grade-letter txt-exc">A</div></div>
+        <div class="grade-item brd-exc" data-level="exc"><div><div class="grade-name">Liam</div><div class="grade-status">Excellent ⭐</div></div><div class="grade-letter txt-exc">A</div></div>
+        <div class="grade-item brd-good" data-level="good"><div><div class="grade-name">Mia</div><div class="grade-status">Good 👍</div></div><div class="grade-letter txt-good">B+</div></div>
+        <div class="grade-item brd-good" data-level="good"><div><div class="grade-name">Noah</div><div class="grade-status">Good 👍</div></div><div class="grade-letter txt-good">B</div></div>
+        <div class="grade-item brd-avg" data-level="avg"><div><div class="grade-name">Ella</div><div class="grade-status">Average 😐</div></div><div class="grade-letter txt-avg">C+</div></div>
+        <div class="grade-item brd-avg" data-level="avg"><div><div class="grade-name">James</div><div class="grade-status">Average 😐</div></div><div class="grade-letter txt-avg">C</div></div>
+        <div class="grade-item brd-avg" data-level="avg"><div><div class="grade-name">Olivia</div><div class="grade-status">Average 😐</div></div><div class="grade-letter txt-avg">C</div></div>
+        <div class="grade-item brd-low" data-level="low"><div><div class="grade-name">Lucas</div><div class="grade-status">Needs Support 🚨</div></div><div class="grade-letter txt-low">D</div></div>
+        <div class="grade-item brd-low" data-level="low"><div><div class="grade-name">Emma</div><div class="grade-status">Needs Support 🚨</div></div><div class="grade-letter txt-low">F</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="bottom-row">
+
+    <!-- Top 3 -->
+    <div class="card">
+      <div class="card-title"><div class="left">🏆 Top 3 Students</div></div>
+      <div class="top3-list">
+        <div class="top3-item" style="background:#fffbeb;border-color:#fde68a" onclick="showModal('🥇','Aiden Carter','Score: 96 | Grade: A+ | Status: Excellent','96 / 100')">
+          <div class="rank-badge r1">1</div>
+          <div class="top3-info"><div class="top3-name">Aiden Carter</div><div class="top3-sub">Score: 96 | Grade: A+</div></div>
+          <div class="top3-score">96</div><div class="top3-ach">🥇</div>
+        </div>
+        <div class="top3-item" style="background:#f8fafc;border-color:#cbd5e1" onclick="showModal('🥈','Sofia Mendez','Score: 91 | Grade: A | Status: Excellent','91 / 100')">
+          <div class="rank-badge r2">2</div>
+          <div class="top3-info"><div class="top3-name">Sofia Mendez</div><div class="top3-sub">Score: 91 | Grade: A</div></div>
+          <div class="top3-score">91</div><div class="top3-ach">🥈</div>
+        </div>
+        <div class="top3-item" style="background:#fff7f3;border-color:#fed7aa" onclick="showModal('🥉','Liam Johnson','Score: 88 | Grade: A | Status: Excellent','88 / 100')">
+          <div class="rank-badge r3">3</div>
+          <div class="top3-info"><div class="top3-name">Liam Johnson</div><div class="top3-sub">Score: 88 | Grade: A</div></div>
+          <div class="top3-score">88</div><div class="top3-ach">🥉</div>
+        </div>
+      </div>
+      <div class="ach-section">
+        <div class="ach-title">Achievement Icons</div>
+        <div class="ach-pills">
+          <span class="ach-pill">⭐ Excellent (90–100)</span>
+          <span class="ach-pill">👍 Good (80–89)</span>
+          <span class="ach-pill">😐 Average (60–79)</span>
+          <span class="ach-pill">🚨 Needs Support (&lt;60)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="card">
+      <div class="card-title"><div class="left">✅ Achievement Checklist</div></div>
+      <div class="checklist" id="checklist">
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Submit all homework on time</div><span class="check-tag" style="background:#22c55e">Done</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Complete Mathematics Quiz</div><span class="check-tag" style="background:#22c55e">Done</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Pass mid-term assessment</div><span class="check-tag" style="background:#22c55e">Done</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Achieve grade B or above</div><span class="check-tag" style="background:#3b82d4">Top 5</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Participate in group activity</div><span class="check-tag" style="background:#22c55e">Done</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box pend-box"></div><div class="check-label">Complete oral presentation</div><span class="check-tag" style="background:#f59e0b">Ongoing</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box pend-box"></div><div class="check-label">Submit final lab report</div><span class="check-tag" style="background:#f59e0b">Pending</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box pend-box"></div><div class="check-label">Pass final examination</div><span class="check-tag" style="background:#ef4444">Upcoming</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box pend-box"></div><div class="check-label">Achieve class top ranking</div><span class="check-tag" style="background:#7c5cd8">Goal</span></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:55.6%"></div></div>
+      <div class="progress-text" id="progressText">📊 Progress: <strong style="color:#22c55e">5 of 9</strong> completed — 56%</div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Excellent (90–100)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3b82d4"></div> Good (80–89)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Average (60–79)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Needs Support (&lt;60)</div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-icon" id="mIcon"></div>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-desc"  id="mDesc"></div>
+    <div class="modal-stat"  id="mStat"></div>
+    <button class="modal-btn" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<footer>Made with IBM Bob</footer>
+
+<script>
+  /* ── Filter ─────────────────────────────────────── */
+  function filterStudents(level) {
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelector('.filter-btn.f-' + (level === 'all' ? 'all' : level)).classList.add('active');
+
+    var visible = 0;
+    document.querySelectorAll('#marksList .mark-row').forEach(function(r) {
+      var show = level === 'all' || r.dataset.level === level;
+      r.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    document.querySelectorAll('.grade-list .grade-item').forEach(function(r) {
+      r.classList.toggle('hidden', level !== 'all' && r.dataset.level !== level);
+    });
+    document.getElementById('countLabel').textContent = level === 'all' ? 10 : visible;
+  }
+
+  /* ── Sort Marks ─────────────────────────────────── */
+  var sortAsc = false;
+  function sortMarks() {
+    sortAsc = !sortAsc;
+    var list = document.getElementById('marksList');
+    Array.from(list.querySelectorAll('.mark-row'))
+      .sort(function(a, b) {
+        return sortAsc
+          ? parseInt(a.dataset.score) - parseInt(b.dataset.score)
+          : parseInt(b.dataset.score) - parseInt(a.dataset.score);
+      })
+      .forEach(function(r) { list.appendChild(r); });
+  }
+
+  /* ── Cycle Task Badge ───────────────────────────── */
+  var states  = ['Done', 'In Progress', 'Pending'];
+  var colors  = { 'Done': '#22c55e', 'In Progress': '#f59e0b', 'Pending': '#ef4444' };
+  function cycleTask(el) {
+    var next = states[(states.indexOf(el.textContent.trim()) + 1) % states.length];
+    el.textContent = next;
+    el.style.background = colors[next];
+  }
+
+  /* ── Toggle Checklist ───────────────────────────── */
+  function toggleCheck(item) {
+    var box   = item.querySelector('.check-box');
+    var label = item.querySelector('.check-label');
+    var done  = box.classList.contains('done-box');
+    box.classList.toggle('done-box', !done);
+    box.classList.toggle('pend-box',  done);
+    box.textContent = done ? '' : '✓';
+    label.classList.toggle('striked', !done);
+    updateProgress();
+  }
+  function updateProgress() {
+    var total = document.querySelectorAll('#checklist .check-item').length;
+    var done  = document.querySelectorAll('#checklist .check-box.done-box').length;
+    var pct   = Math.round(done / total * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').innerHTML =
+      '📊 Progress: <strong style="color:#22c55e">' + done + ' of ' + total + '</strong> completed — ' + pct + '%';
+  }
+
+  /* ── Modal ──────────────────────────────────────── */
+  function showModal(icon, title, desc, stat) {
+    document.getElementById('mIcon').textContent  = icon;
+    document.getElementById('mTitle').textContent = title;
+    document.getElementById('mDesc').textContent  = desc;
+    document.getElementById('mStat').textContent  = stat;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+</body>
+</html>
