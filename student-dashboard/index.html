@@ -21,6 +21,88 @@
   .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
   .header p  { color: #57606a; font-size: 13px; margin-top: 4px; }
 
+  /* Edit Mode Toggle Bar */
+  .edit-bar {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 18px;
+  }
+  .edit-toggle {
+    padding: 8px 22px; border-radius: 20px; border: 2px solid #7c5cd8;
+    background: #fff; font-size: 13px; font-weight: 700;
+    cursor: pointer; color: #7c5cd8; transition: all 0.15s;
+  }
+  .edit-toggle.on { background: #7c5cd8; color: #fff; }
+  .edit-toggle:hover { opacity: 0.85; }
+  .edit-hint { font-size: 12px; color: #9ca3af; }
+
+  /* Edit Mode highlight */
+  body.edit-mode .editable {
+    outline: 2px dashed #7c5cd8;
+    border-radius: 4px;
+    background: #faf5ff !important;
+    cursor: text;
+  }
+  body.edit-mode .editable:focus {
+    outline: 2px solid #7c5cd8;
+    background: #fff !important;
+  }
+
+  /* Edit panel */
+  .edit-panel {
+    display: none;
+    background: #fff;
+    border: 2px solid #7c5cd8;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  .edit-panel.open { display: block; }
+  .edit-panel h3 { font-size: 14px; font-weight: 700; color: #7c5cd8; margin-bottom: 14px; }
+  .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .edit-field { display: flex; flex-direction: column; gap: 4px; }
+  .edit-field label { font-size: 11px; font-weight: 700; color: #57606a; text-transform: uppercase; letter-spacing: 0.4px; }
+  .edit-field input, .edit-field select {
+    padding: 7px 10px; border: 1px solid #e5e7eb; border-radius: 8px;
+    font-size: 13px; font-family: inherit; outline: none; transition: border 0.15s;
+  }
+  .edit-field input:focus, .edit-field select:focus { border-color: #7c5cd8; }
+  .edit-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .btn-save {
+    padding: 8px 20px; background: #7c5cd8; color: #fff;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-save:hover { background: #6644c0; }
+  .btn-add {
+    padding: 8px 20px; background: #22c55e; color: #fff;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-add:hover { background: #16a34a; }
+  .btn-del {
+    padding: 8px 20px; background: #ef4444; color: #fff;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-del:hover { background: #dc2626; }
+  .btn-cancel {
+    padding: 8px 20px; background: #f7f8fa; color: #57606a;
+    border: 1px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-cancel:hover { background: #e5e7eb; }
+  .edit-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .edit-tab {
+    padding: 5px 14px; border-radius: 20px; border: 1px solid #e5e7eb;
+    background: #f7f8fa; font-size: 12px; font-weight: 600;
+    cursor: pointer; color: #57606a; transition: all 0.15s;
+  }
+  .edit-tab.active { background: #7c5cd8; color: #fff; border-color: #7c5cd8; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .student-select-row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 14px; }
+  .student-select-row .edit-field { flex: 1; }
+
   /* Filter Bar */
   .filter-bar {
     display: flex; gap: 8px; flex-wrap: wrap;
@@ -207,6 +289,131 @@
     <p>Academic Year 2024–2025 &nbsp;|&nbsp; Class 10-A &nbsp;|&nbsp; <span id="countLabel">10</span> Students Shown</p>
   </div>
 
+  <!-- Edit Mode Toggle -->
+  <div class="edit-bar">
+    <button class="edit-toggle" id="editToggleBtn" onclick="toggleEditMode()">✏️ Edit Mode: OFF</button>
+    <span class="edit-hint" id="editHintText"></span>
+  </div>
+
+  <!-- Edit Panel -->
+  <div class="edit-panel" id="editPanel">
+    <h3>✏️ Edit Dashboard Data</h3>
+    <div class="edit-tabs">
+      <button class="edit-tab active" onclick="switchTab('students')">👤 Students</button>
+      <button class="edit-tab" onclick="switchTab('tasks')">📝 Tasks</button>
+      <button class="edit-tab" onclick="switchTab('checklist')">✅ Checklist</button>
+    </div>
+
+    <!-- Tab: Students -->
+    <div class="tab-content active" id="tab-students">
+      <div class="student-select-row">
+        <div class="edit-field">
+          <label>Select Student to Edit</label>
+          <select id="studentSelect" onchange="loadStudentToEdit()"></select>
+        </div>
+        <button class="btn-add" onclick="addNewStudent()">+ Add Student</button>
+      </div>
+      <div class="edit-grid">
+        <div class="edit-field">
+          <label>First Name</label>
+          <input type="text" id="editName" placeholder="e.g. Ahmad">
+        </div>
+        <div class="edit-field">
+          <label>Last Name</label>
+          <input type="text" id="editLastName" placeholder="e.g. Razali">
+        </div>
+        <div class="edit-field">
+          <label>Score (0–100)</label>
+          <input type="number" id="editScore" min="0" max="100" placeholder="e.g. 85">
+        </div>
+        <div class="edit-field">
+          <label>Grade</label>
+          <select id="editGrade">
+            <option>A+</option><option>A</option><option>A-</option>
+            <option>B+</option><option>B</option><option>B-</option>
+            <option>C+</option><option>C</option><option>C-</option>
+            <option>D</option><option>F</option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-save" onclick="saveStudent()">💾 Save Student</button>
+        <button class="btn-del" onclick="deleteStudent()">🗑️ Delete Student</button>
+      </div>
+    </div>
+
+    <!-- Tab: Tasks -->
+    <div class="tab-content" id="tab-tasks">
+      <div class="student-select-row">
+        <div class="edit-field">
+          <label>Select Task to Edit</label>
+          <select id="taskSelect" onchange="loadTaskToEdit()"></select>
+        </div>
+        <button class="btn-add" onclick="addNewTask()">+ Add Task</button>
+      </div>
+      <div class="edit-grid">
+        <div class="edit-field">
+          <label>Task Name</label>
+          <input type="text" id="editTaskName" placeholder="e.g. Science Quiz">
+        </div>
+        <div class="edit-field">
+          <label>Status</label>
+          <select id="editTaskStatus">
+            <option value="Done">Done</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-save" onclick="saveTask()">💾 Save Task</button>
+        <button class="btn-del" onclick="deleteTask()">🗑️ Delete Task</button>
+      </div>
+    </div>
+
+    <!-- Tab: Checklist -->
+    <div class="tab-content" id="tab-checklist">
+      <div class="student-select-row">
+        <div class="edit-field">
+          <label>Select Item to Edit</label>
+          <select id="checkSelect" onchange="loadCheckToEdit()"></select>
+        </div>
+        <button class="btn-add" onclick="addNewCheck()">+ Add Item</button>
+      </div>
+      <div class="edit-grid">
+        <div class="edit-field">
+          <label>Item Label</label>
+          <input type="text" id="editCheckLabel" placeholder="e.g. Submit assignment">
+        </div>
+        <div class="edit-field">
+          <label>Tag / Status</label>
+          <input type="text" id="editCheckTag" placeholder="e.g. Ongoing">
+        </div>
+        <div class="edit-field">
+          <label>Tag Colour</label>
+          <select id="editCheckColor">
+            <option value="#22c55e">Green (Done)</option>
+            <option value="#3b82d4">Blue (Top)</option>
+            <option value="#f59e0b">Yellow (Ongoing)</option>
+            <option value="#ef4444">Red (Upcoming)</option>
+            <option value="#7c5cd8">Purple (Goal)</option>
+          </select>
+        </div>
+        <div class="edit-field">
+          <label>Checked?</label>
+          <select id="editCheckDone">
+            <option value="yes">✓ Done (checked)</option>
+            <option value="no">○ Pending (unchecked)</option>
+          </select>
+        </div>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-save" onclick="saveCheckItem()">💾 Save Item</button>
+        <button class="btn-del" onclick="deleteCheckItem()">🗑️ Delete Item</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Filter Buttons -->
   <div class="filter-bar">
     <button class="filter-btn f-all active" onclick="filterStudents('all')">🔍 All Students</button>
@@ -218,20 +425,20 @@
 
   <!-- Stats -->
   <div class="stats-row">
-    <div class="stat-box" onclick="showModal('📊','Class Average Score','Overall average across all 10 students.','78%')">
-      <div class="stat-val" style="color:#3b82d4;">78%</div>
+    <div class="stat-box" onclick="showModal('📊','Class Average Score','Overall average across all students.', computeAvg() + '%')">
+      <div class="stat-val" style="color:#3b82d4;" id="statAvg">78%</div>
       <div class="stat-label">Class Average</div>
     </div>
-    <div class="stat-box" onclick="showModal('⭐','Excellent Students','Students who scored 90 or above.','4')">
-      <div class="stat-val" style="color:#22c55e;">4</div>
+    <div class="stat-box" onclick="filterStudents('exc')">
+      <div class="stat-val" style="color:#22c55e;" id="statExc">4</div>
       <div class="stat-label">Excellent</div>
     </div>
-    <div class="stat-box" onclick="showModal('😐','Average Students','Students who scored between 60–79.','4')">
-      <div class="stat-val" style="color:#f59e0b;">4</div>
+    <div class="stat-box" onclick="filterStudents('avg')">
+      <div class="stat-val" style="color:#f59e0b;" id="statAvgCount">4</div>
       <div class="stat-label">Average</div>
     </div>
-    <div class="stat-box" onclick="showModal('🚨','Need Support','Students who scored below 60.','2')">
-      <div class="stat-val" style="color:#ef4444;">2</div>
+    <div class="stat-box" onclick="filterStudents('low')">
+      <div class="stat-val" style="color:#ef4444;" id="statLow">2</div>
       <div class="stat-label">Need Support</div>
     </div>
   </div>
@@ -245,51 +452,20 @@
         <div class="left">📋 Student Marks</div>
         <button class="sort-btn" onclick="sortMarks()">⇅ Sort</button>
       </div>
-      <div class="marks-list" id="marksList">
-        <div class="mark-row" data-level="exc" data-score="96"><div class="mark-name">Aiden</div><div class="bar-wrap"><div class="bar-fill clr-exc" style="width:96%"></div></div><div class="mark-score txt-exc">96</div></div>
-        <div class="mark-row" data-level="exc" data-score="91"><div class="mark-name">Sofia</div><div class="bar-wrap"><div class="bar-fill clr-exc" style="width:91%"></div></div><div class="mark-score txt-exc">91</div></div>
-        <div class="mark-row" data-level="exc" data-score="88"><div class="mark-name">Liam</div><div class="bar-wrap"><div class="bar-fill clr-exc" style="width:88%"></div></div><div class="mark-score txt-exc">88</div></div>
-        <div class="mark-row" data-level="good" data-score="82"><div class="mark-name">Mia</div><div class="bar-wrap"><div class="bar-fill clr-good" style="width:82%"></div></div><div class="mark-score txt-good">82</div></div>
-        <div class="mark-row" data-level="good" data-score="79"><div class="mark-name">Noah</div><div class="bar-wrap"><div class="bar-fill clr-good" style="width:79%"></div></div><div class="mark-score txt-good">79</div></div>
-        <div class="mark-row" data-level="avg" data-score="74"><div class="mark-name">Ella</div><div class="bar-wrap"><div class="bar-fill clr-avg" style="width:74%"></div></div><div class="mark-score txt-avg">74</div></div>
-        <div class="mark-row" data-level="avg" data-score="70"><div class="mark-name">James</div><div class="bar-wrap"><div class="bar-fill clr-avg" style="width:70%"></div></div><div class="mark-score txt-avg">70</div></div>
-        <div class="mark-row" data-level="avg" data-score="65"><div class="mark-name">Olivia</div><div class="bar-wrap"><div class="bar-fill clr-avg" style="width:65%"></div></div><div class="mark-score txt-avg">65</div></div>
-        <div class="mark-row" data-level="low" data-score="55"><div class="mark-name">Lucas</div><div class="bar-wrap"><div class="bar-fill clr-low" style="width:55%"></div></div><div class="mark-score txt-low">55</div></div>
-        <div class="mark-row" data-level="low" data-score="48"><div class="mark-name">Emma</div><div class="bar-wrap"><div class="bar-fill clr-low" style="width:48%"></div></div><div class="mark-score txt-low">48</div></div>
-      </div>
+      <div class="marks-list" id="marksList"></div>
     </div>
 
     <!-- Card 2: Assessment Tasks -->
     <div class="card">
       <div class="card-title"><div class="left">📝 Assessment Tasks</div></div>
-      <div class="task-list">
-        <div class="task-item"><div class="task-name">Mathematics Quiz</div>   <span class="task-badge" style="background:#22c55e" onclick="cycleTask(this)">Done</span></div>
-        <div class="task-item"><div class="task-name">Science Report</div>      <span class="task-badge" style="background:#22c55e" onclick="cycleTask(this)">Done</span></div>
-        <div class="task-item"><div class="task-name">English Essay</div>       <span class="task-badge" style="background:#3b82d4" onclick="cycleTask(this)">Done</span></div>
-        <div class="task-item"><div class="task-name">History Project</div>     <span class="task-badge" style="background:#3b82d4" onclick="cycleTask(this)">Done</span></div>
-        <div class="task-item"><div class="task-name">Oral Presentation</div>   <span class="task-badge" style="background:#f59e0b" onclick="cycleTask(this)">In Progress</span></div>
-        <div class="task-item"><div class="task-name">Group Assignment</div>    <span class="task-badge" style="background:#f59e0b" onclick="cycleTask(this)">In Progress</span></div>
-        <div class="task-item"><div class="task-name">Lab Experiment</div>      <span class="task-badge" style="background:#ef4444" onclick="cycleTask(this)">Pending</span></div>
-        <div class="task-item"><div class="task-name">Final Exam</div>          <span class="task-badge" style="background:#ef4444" onclick="cycleTask(this)">Pending</span></div>
-      </div>
+      <div class="task-list" id="taskList"></div>
       <p class="hint">💡 Click a badge to cycle its status</p>
     </div>
 
     <!-- Card 3: Grading Status -->
     <div class="card">
       <div class="card-title"><div class="left">🎓 Grading Status</div></div>
-      <div class="grade-list">
-        <div class="grade-item brd-exc" data-level="exc"><div><div class="grade-name">Aiden</div><div class="grade-status">Excellent ⭐</div></div><div class="grade-letter txt-exc">A+</div></div>
-        <div class="grade-item brd-exc" data-level="exc"><div><div class="grade-name">Sofia</div><div class="grade-status">Excellent ⭐</div></div><div class="grade-letter txt-exc">A</div></div>
-        <div class="grade-item brd-exc" data-level="exc"><div><div class="grade-name">Liam</div><div class="grade-status">Excellent ⭐</div></div><div class="grade-letter txt-exc">A</div></div>
-        <div class="grade-item brd-good" data-level="good"><div><div class="grade-name">Mia</div><div class="grade-status">Good 👍</div></div><div class="grade-letter txt-good">B+</div></div>
-        <div class="grade-item brd-good" data-level="good"><div><div class="grade-name">Noah</div><div class="grade-status">Good 👍</div></div><div class="grade-letter txt-good">B</div></div>
-        <div class="grade-item brd-avg" data-level="avg"><div><div class="grade-name">Ella</div><div class="grade-status">Average 😐</div></div><div class="grade-letter txt-avg">C+</div></div>
-        <div class="grade-item brd-avg" data-level="avg"><div><div class="grade-name">James</div><div class="grade-status">Average 😐</div></div><div class="grade-letter txt-avg">C</div></div>
-        <div class="grade-item brd-avg" data-level="avg"><div><div class="grade-name">Olivia</div><div class="grade-status">Average 😐</div></div><div class="grade-letter txt-avg">C</div></div>
-        <div class="grade-item brd-low" data-level="low"><div><div class="grade-name">Lucas</div><div class="grade-status">Needs Support 🚨</div></div><div class="grade-letter txt-low">D</div></div>
-        <div class="grade-item brd-low" data-level="low"><div><div class="grade-name">Emma</div><div class="grade-status">Needs Support 🚨</div></div><div class="grade-letter txt-low">F</div></div>
-      </div>
+      <div class="grade-list" id="gradeList"></div>
     </div>
   </div>
 
@@ -299,23 +475,7 @@
     <!-- Top 3 -->
     <div class="card">
       <div class="card-title"><div class="left">🏆 Top 3 Students</div></div>
-      <div class="top3-list">
-        <div class="top3-item" style="background:#fffbeb;border-color:#fde68a" onclick="showModal('🥇','Aiden Carter','Score: 96 | Grade: A+ | Status: Excellent','96 / 100')">
-          <div class="rank-badge r1">1</div>
-          <div class="top3-info"><div class="top3-name">Aiden Carter</div><div class="top3-sub">Score: 96 | Grade: A+</div></div>
-          <div class="top3-score">96</div><div class="top3-ach">🥇</div>
-        </div>
-        <div class="top3-item" style="background:#f8fafc;border-color:#cbd5e1" onclick="showModal('🥈','Sofia Mendez','Score: 91 | Grade: A | Status: Excellent','91 / 100')">
-          <div class="rank-badge r2">2</div>
-          <div class="top3-info"><div class="top3-name">Sofia Mendez</div><div class="top3-sub">Score: 91 | Grade: A</div></div>
-          <div class="top3-score">91</div><div class="top3-ach">🥈</div>
-        </div>
-        <div class="top3-item" style="background:#fff7f3;border-color:#fed7aa" onclick="showModal('🥉','Liam Johnson','Score: 88 | Grade: A | Status: Excellent','88 / 100')">
-          <div class="rank-badge r3">3</div>
-          <div class="top3-info"><div class="top3-name">Liam Johnson</div><div class="top3-sub">Score: 88 | Grade: A</div></div>
-          <div class="top3-score">88</div><div class="top3-ach">🥉</div>
-        </div>
-      </div>
+      <div class="top3-list" id="top3List"></div>
       <div class="ach-section">
         <div class="ach-title">Achievement Icons</div>
         <div class="ach-pills">
@@ -330,19 +490,9 @@
     <!-- Checklist -->
     <div class="card">
       <div class="card-title"><div class="left">✅ Achievement Checklist</div></div>
-      <div class="checklist" id="checklist">
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Submit all homework on time</div><span class="check-tag" style="background:#22c55e">Done</span></div>
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Complete Mathematics Quiz</div><span class="check-tag" style="background:#22c55e">Done</span></div>
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Pass mid-term assessment</div><span class="check-tag" style="background:#22c55e">Done</span></div>
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Achieve grade B or above</div><span class="check-tag" style="background:#3b82d4">Top 5</span></div>
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box done-box">✓</div><div class="check-label striked">Participate in group activity</div><span class="check-tag" style="background:#22c55e">Done</span></div>
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box pend-box"></div><div class="check-label">Complete oral presentation</div><span class="check-tag" style="background:#f59e0b">Ongoing</span></div>
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box pend-box"></div><div class="check-label">Submit final lab report</div><span class="check-tag" style="background:#f59e0b">Pending</span></div>
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box pend-box"></div><div class="check-label">Pass final examination</div><span class="check-tag" style="background:#ef4444">Upcoming</span></div>
-        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box pend-box"></div><div class="check-label">Achieve class top ranking</div><span class="check-tag" style="background:#7c5cd8">Goal</span></div>
-      </div>
-      <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:55.6%"></div></div>
-      <div class="progress-text" id="progressText">📊 Progress: <strong style="color:#22c55e">5 of 9</strong> completed — 56%</div>
+      <div class="checklist" id="checklist"></div>
+      <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText"></div>
     </div>
   </div>
 
@@ -369,80 +519,466 @@
 <footer>Made with IBM Bob</footer>
 
 <script>
-  /* ── Filter ─────────────────────────────────────── */
-  function filterStudents(level) {
-    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
-    document.querySelector('.filter-btn.f-' + (level === 'all' ? 'all' : level)).classList.add('active');
+/* ═══════════════════════════════════════════
+   DATA STORE
+═══════════════════════════════════════════ */
+var students = [
+  { name: 'Aiden',  lastName: 'Carter',  score: 96, grade: 'A+' },
+  { name: 'Sofia',  lastName: 'Mendez',  score: 91, grade: 'A'  },
+  { name: 'Liam',   lastName: 'Johnson', score: 88, grade: 'A'  },
+  { name: 'Mia',    lastName: 'Brown',   score: 82, grade: 'B+' },
+  { name: 'Noah',   lastName: 'Wilson',  score: 79, grade: 'B'  },
+  { name: 'Ella',   lastName: 'Davis',   score: 74, grade: 'C+' },
+  { name: 'James',  lastName: 'Miller',  score: 70, grade: 'C'  },
+  { name: 'Olivia', lastName: 'Moore',   score: 65, grade: 'C'  },
+  { name: 'Lucas',  lastName: 'Taylor',  score: 55, grade: 'D'  },
+  { name: 'Emma',   lastName: 'Anderson',score: 48, grade: 'F'  }
+];
 
-    var visible = 0;
-    document.querySelectorAll('#marksList .mark-row').forEach(function(r) {
-      var show = level === 'all' || r.dataset.level === level;
-      r.classList.toggle('hidden', !show);
-      if (show) visible++;
-    });
-    document.querySelectorAll('.grade-list .grade-item').forEach(function(r) {
-      r.classList.toggle('hidden', level !== 'all' && r.dataset.level !== level);
-    });
-    document.getElementById('countLabel').textContent = level === 'all' ? 10 : visible;
-  }
+var tasks = [
+  { name: 'Mathematics Quiz',  status: 'Done'        },
+  { name: 'Science Report',    status: 'Done'        },
+  { name: 'English Essay',     status: 'Done'        },
+  { name: 'History Project',   status: 'Done'        },
+  { name: 'Oral Presentation', status: 'In Progress' },
+  { name: 'Group Assignment',  status: 'In Progress' },
+  { name: 'Lab Experiment',    status: 'Pending'     },
+  { name: 'Final Exam',        status: 'Pending'     }
+];
 
-  /* ── Sort Marks ─────────────────────────────────── */
-  var sortAsc = false;
-  function sortMarks() {
-    sortAsc = !sortAsc;
-    var list = document.getElementById('marksList');
-    Array.from(list.querySelectorAll('.mark-row'))
-      .sort(function(a, b) {
-        return sortAsc
-          ? parseInt(a.dataset.score) - parseInt(b.dataset.score)
-          : parseInt(b.dataset.score) - parseInt(a.dataset.score);
-      })
-      .forEach(function(r) { list.appendChild(r); });
-  }
+var checkItems = [
+  { label: 'Submit all homework on time',  tag: 'Done',     color: '#22c55e', done: true  },
+  { label: 'Complete Mathematics Quiz',    tag: 'Done',     color: '#22c55e', done: true  },
+  { label: 'Pass mid-term assessment',     tag: 'Done',     color: '#22c55e', done: true  },
+  { label: 'Achieve grade B or above',     tag: 'Top 5',    color: '#3b82d4', done: true  },
+  { label: 'Participate in group activity',tag: 'Done',     color: '#22c55e', done: true  },
+  { label: 'Complete oral presentation',   tag: 'Ongoing',  color: '#f59e0b', done: false },
+  { label: 'Submit final lab report',      tag: 'Pending',  color: '#f59e0b', done: false },
+  { label: 'Pass final examination',       tag: 'Upcoming', color: '#ef4444', done: false },
+  { label: 'Achieve class top ranking',    tag: 'Goal',     color: '#7c5cd8', done: false }
+];
 
-  /* ── Cycle Task Badge ───────────────────────────── */
-  var states  = ['Done', 'In Progress', 'Pending'];
-  var colors  = { 'Done': '#22c55e', 'In Progress': '#f59e0b', 'Pending': '#ef4444' };
-  function cycleTask(el) {
-    var next = states[(states.indexOf(el.textContent.trim()) + 1) % states.length];
-    el.textContent = next;
-    el.style.background = colors[next];
-  }
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+function getLevel(score) {
+  if (score >= 90) return 'exc';
+  if (score >= 80) return 'good';
+  if (score >= 60) return 'avg';
+  return 'low';
+}
+function getLevelLabel(level) {
+  return { exc: 'Excellent ⭐', good: 'Good 👍', avg: 'Average 😐', low: 'Needs Support 🚨' }[level];
+}
+function computeAvg() {
+  if (!students.length) return 0;
+  return Math.round(students.reduce(function(s, x) { return s + x.score; }, 0) / students.length);
+}
+var taskColors = { 'Done': '#22c55e', 'In Progress': '#f59e0b', 'Pending': '#ef4444' };
+var top3Colors = [
+  { bg: '#fffbeb', brd: '#fde68a', rank: 'r1', medal: '🥇' },
+  { bg: '#f8fafc', brd: '#cbd5e1', rank: 'r2', medal: '🥈' },
+  { bg: '#fff7f3', brd: '#fed7aa', rank: 'r3', medal: '🥉' }
+];
 
-  /* ── Toggle Checklist ───────────────────────────── */
-  function toggleCheck(item) {
-    var box   = item.querySelector('.check-box');
-    var label = item.querySelector('.check-label');
-    var done  = box.classList.contains('done-box');
-    box.classList.toggle('done-box', !done);
-    box.classList.toggle('pend-box',  done);
-    box.textContent = done ? '' : '✓';
-    label.classList.toggle('striked', !done);
-    updateProgress();
-  }
-  function updateProgress() {
-    var total = document.querySelectorAll('#checklist .check-item').length;
-    var done  = document.querySelectorAll('#checklist .check-box.done-box').length;
-    var pct   = Math.round(done / total * 100);
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressText').innerHTML =
-      '📊 Progress: <strong style="color:#22c55e">' + done + ' of ' + total + '</strong> completed — ' + pct + '%';
-  }
+/* ═══════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function render() {
+  renderMarks();
+  renderGrades();
+  renderTasks();
+  renderChecklist();
+  renderTop3();
+  updateStats();
+  populateSelects();
+}
 
-  /* ── Modal ──────────────────────────────────────── */
-  function showModal(icon, title, desc, stat) {
-    document.getElementById('mIcon').textContent  = icon;
-    document.getElementById('mTitle').textContent = title;
-    document.getElementById('mDesc').textContent  = desc;
-    document.getElementById('mStat').textContent  = stat;
-    document.getElementById('modalOverlay').classList.add('open');
-  }
-  function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeModal();
+function renderMarks() {
+  var list = document.getElementById('marksList');
+  list.innerHTML = '';
+  students.forEach(function(s) {
+    var lv = getLevel(s.score);
+    var row = document.createElement('div');
+    row.className = 'mark-row';
+    row.dataset.level = lv;
+    row.dataset.score = s.score;
+    row.innerHTML =
+      '<div class="mark-name">' + s.name + '</div>' +
+      '<div class="bar-wrap"><div class="bar-fill clr-' + lv + '" style="width:' + s.score + '%"></div></div>' +
+      '<div class="mark-score txt-' + lv + '">' + s.score + '</div>';
+    list.appendChild(row);
   });
+}
+
+function renderGrades() {
+  var list = document.getElementById('gradeList');
+  list.innerHTML = '';
+  students.forEach(function(s) {
+    var lv = getLevel(s.score);
+    var item = document.createElement('div');
+    item.className = 'grade-item brd-' + lv;
+    item.dataset.level = lv;
+    item.innerHTML =
+      '<div><div class="grade-name">' + s.name + '</div>' +
+      '<div class="grade-status">' + getLevelLabel(lv) + '</div></div>' +
+      '<div class="grade-letter txt-' + lv + '">' + s.grade + '</div>';
+    list.appendChild(item);
+  });
+}
+
+function renderTasks() {
+  var list = document.getElementById('taskList');
+  list.innerHTML = '';
+  tasks.forEach(function(t, i) {
+    var item = document.createElement('div');
+    item.className = 'task-item';
+    item.innerHTML =
+      '<div class="task-name">' + t.name + '</div>' +
+      '<span class="task-badge" style="background:' + taskColors[t.status] + '" data-idx="' + i + '" onclick="cycleTask(this)">' + t.status + '</span>';
+    list.appendChild(item);
+  });
+}
+
+function renderChecklist() {
+  var list = document.getElementById('checklist');
+  list.innerHTML = '';
+  checkItems.forEach(function(c, i) {
+    var item = document.createElement('div');
+    item.className = 'check-item';
+    item.dataset.idx = i;
+    item.onclick = function() { toggleCheck(this); };
+    item.innerHTML =
+      '<div class="check-box ' + (c.done ? 'done-box' : 'pend-box') + '">' + (c.done ? '✓' : '') + '</div>' +
+      '<div class="check-label' + (c.done ? ' striked' : '') + '">' + c.label + '</div>' +
+      '<span class="check-tag" style="background:' + c.color + '">' + c.tag + '</span>';
+    list.appendChild(item);
+  });
+  updateProgress();
+}
+
+function renderTop3() {
+  var sorted = students.slice().sort(function(a, b) { return b.score - a.score; });
+  var top = sorted.slice(0, 3);
+  var list = document.getElementById('top3List');
+  list.innerHTML = '';
+  top.forEach(function(s, i) {
+    var c = top3Colors[i];
+    var item = document.createElement('div');
+    item.className = 'top3-item';
+    item.style.background = c.bg;
+    item.style.borderColor = c.brd;
+    item.onclick = function() {
+      showModal(c.medal, s.name + ' ' + s.lastName,
+        'Score: ' + s.score + ' | Grade: ' + s.grade,
+        s.score + ' / 100');
+    };
+    item.innerHTML =
+      '<div class="rank-badge ' + c.rank + '">' + (i + 1) + '</div>' +
+      '<div class="top3-info"><div class="top3-name">' + s.name + ' ' + s.lastName + '</div>' +
+      '<div class="top3-sub">Score: ' + s.score + ' | Grade: ' + s.grade + '</div></div>' +
+      '<div class="top3-score">' + s.score + '</div>' +
+      '<div class="top3-ach">' + c.medal + '</div>';
+    list.appendChild(item);
+  });
+}
+
+function updateStats() {
+  var avg = computeAvg();
+  document.getElementById('statAvg').textContent = avg + '%';
+  document.getElementById('statExc').textContent = students.filter(function(s) { return getLevel(s.score) === 'exc'; }).length;
+  document.getElementById('statAvgCount').textContent = students.filter(function(s) { return getLevel(s.score) === 'avg'; }).length;
+  document.getElementById('statLow').textContent = students.filter(function(s) { return getLevel(s.score) === 'low'; }).length;
+  document.getElementById('countLabel').textContent = students.length;
+}
+
+/* ═══════════════════════════════════════════
+   POPULATE SELECTS
+═══════════════════════════════════════════ */
+function populateSelects() {
+  // Students
+  var ss = document.getElementById('studentSelect');
+  var prev = ss.value;
+  ss.innerHTML = '';
+  students.forEach(function(s, i) {
+    var o = document.createElement('option');
+    o.value = i;
+    o.textContent = s.name + ' ' + s.lastName + ' (' + s.score + ')';
+    ss.appendChild(o);
+  });
+  ss.value = prev < students.length ? prev : 0;
+  loadStudentToEdit();
+
+  // Tasks
+  var ts = document.getElementById('taskSelect');
+  var tprev = ts.value;
+  ts.innerHTML = '';
+  tasks.forEach(function(t, i) {
+    var o = document.createElement('option');
+    o.value = i;
+    o.textContent = t.name;
+    ts.appendChild(o);
+  });
+  ts.value = tprev < tasks.length ? tprev : 0;
+  loadTaskToEdit();
+
+  // Checklist
+  var cs = document.getElementById('checkSelect');
+  var cprev = cs.value;
+  cs.innerHTML = '';
+  checkItems.forEach(function(c, i) {
+    var o = document.createElement('option');
+    o.value = i;
+    o.textContent = c.label;
+    cs.appendChild(o);
+  });
+  cs.value = cprev < checkItems.length ? cprev : 0;
+  loadCheckToEdit();
+}
+
+/* ═══════════════════════════════════════════
+   EDIT MODE TOGGLE
+═══════════════════════════════════════════ */
+function toggleEditMode() {
+  var on = document.body.classList.toggle('edit-mode');
+  var btn = document.getElementById('editToggleBtn');
+  var hint = document.getElementById('editHintText');
+  var panel = document.getElementById('editPanel');
+  btn.textContent = on ? '✏️ Edit Mode: ON' : '✏️ Edit Mode: OFF';
+  btn.classList.toggle('on', on);
+  panel.classList.toggle('open', on);
+  hint.textContent = on ? 'Gunakan panel di bawah untuk edit data.' : '';
+  if (on) populateSelects();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.edit-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════
+   STUDENT EDIT
+═══════════════════════════════════════════ */
+function loadStudentToEdit() {
+  var i = parseInt(document.getElementById('studentSelect').value);
+  if (isNaN(i) || !students[i]) return;
+  var s = students[i];
+  document.getElementById('editName').value = s.name;
+  document.getElementById('editLastName').value = s.lastName;
+  document.getElementById('editScore').value = s.score;
+  document.getElementById('editGrade').value = s.grade;
+}
+
+function saveStudent() {
+  var i = parseInt(document.getElementById('studentSelect').value);
+  if (isNaN(i)) return;
+  students[i] = {
+    name: document.getElementById('editName').value.trim() || students[i].name,
+    lastName: document.getElementById('editLastName').value.trim() || students[i].lastName,
+    score: Math.min(100, Math.max(0, parseInt(document.getElementById('editScore').value) || 0)),
+    grade: document.getElementById('editGrade').value
+  };
+  render();
+  filterStudents('all');
+  alert('✅ Student saved!');
+}
+
+function deleteStudent() {
+  var i = parseInt(document.getElementById('studentSelect').value);
+  if (isNaN(i) || students.length <= 1) { alert('Cannot delete the only student.'); return; }
+  if (!confirm('Delete ' + students[i].name + '?')) return;
+  students.splice(i, 1);
+  render();
+  filterStudents('all');
+}
+
+function addNewStudent() {
+  students.push({ name: 'New', lastName: 'Student', score: 70, grade: 'C' });
+  render();
+  var ss = document.getElementById('studentSelect');
+  ss.value = students.length - 1;
+  loadStudentToEdit();
+}
+
+/* ═══════════════════════════════════════════
+   TASK EDIT
+═══════════════════════════════════════════ */
+function loadTaskToEdit() {
+  var i = parseInt(document.getElementById('taskSelect').value);
+  if (isNaN(i) || !tasks[i]) return;
+  document.getElementById('editTaskName').value = tasks[i].name;
+  document.getElementById('editTaskStatus').value = tasks[i].status;
+}
+
+function saveTask() {
+  var i = parseInt(document.getElementById('taskSelect').value);
+  if (isNaN(i)) return;
+  tasks[i] = {
+    name: document.getElementById('editTaskName').value.trim() || tasks[i].name,
+    status: document.getElementById('editTaskStatus').value
+  };
+  renderTasks();
+  populateSelects();
+  alert('✅ Task saved!');
+}
+
+function deleteTask() {
+  var i = parseInt(document.getElementById('taskSelect').value);
+  if (isNaN(i) || tasks.length <= 1) { alert('Cannot delete the only task.'); return; }
+  if (!confirm('Delete task "' + tasks[i].name + '"?')) return;
+  tasks.splice(i, 1);
+  renderTasks();
+  populateSelects();
+}
+
+function addNewTask() {
+  tasks.push({ name: 'New Task', status: 'Pending' });
+  renderTasks();
+  populateSelects();
+  var ts = document.getElementById('taskSelect');
+  ts.value = tasks.length - 1;
+  loadTaskToEdit();
+}
+
+/* ═══════════════════════════════════════════
+   CHECKLIST EDIT
+═══════════════════════════════════════════ */
+function loadCheckToEdit() {
+  var i = parseInt(document.getElementById('checkSelect').value);
+  if (isNaN(i) || !checkItems[i]) return;
+  var c = checkItems[i];
+  document.getElementById('editCheckLabel').value = c.label;
+  document.getElementById('editCheckTag').value = c.tag;
+  document.getElementById('editCheckColor').value = c.color;
+  document.getElementById('editCheckDone').value = c.done ? 'yes' : 'no';
+}
+
+function saveCheckItem() {
+  var i = parseInt(document.getElementById('checkSelect').value);
+  if (isNaN(i)) return;
+  checkItems[i] = {
+    label: document.getElementById('editCheckLabel').value.trim() || checkItems[i].label,
+    tag:   document.getElementById('editCheckTag').value.trim() || checkItems[i].tag,
+    color: document.getElementById('editCheckColor').value,
+    done:  document.getElementById('editCheckDone').value === 'yes'
+  };
+  renderChecklist();
+  populateSelects();
+  alert('✅ Item saved!');
+}
+
+function deleteCheckItem() {
+  var i = parseInt(document.getElementById('checkSelect').value);
+  if (isNaN(i) || checkItems.length <= 1) { alert('Cannot delete the only item.'); return; }
+  if (!confirm('Delete "' + checkItems[i].label + '"?')) return;
+  checkItems.splice(i, 1);
+  renderChecklist();
+  populateSelects();
+}
+
+function addNewCheck() {
+  checkItems.push({ label: 'New item', tag: 'Pending', color: '#f59e0b', done: false });
+  renderChecklist();
+  populateSelects();
+  var cs = document.getElementById('checkSelect');
+  cs.value = checkItems.length - 1;
+  loadCheckToEdit();
+}
+
+/* ═══════════════════════════════════════════
+   FILTER
+═══════════════════════════════════════════ */
+function filterStudents(level) {
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelector('.filter-btn.f-' + (level === 'all' ? 'all' : level)).classList.add('active');
+  var visible = 0;
+  document.querySelectorAll('#marksList .mark-row').forEach(function(r) {
+    var show = level === 'all' || r.dataset.level === level;
+    r.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.querySelectorAll('.grade-list .grade-item').forEach(function(r) {
+    r.classList.toggle('hidden', level !== 'all' && r.dataset.level !== level);
+  });
+  document.getElementById('countLabel').textContent = level === 'all' ? students.length : visible;
+}
+
+/* ═══════════════════════════════════════════
+   SORT
+═══════════════════════════════════════════ */
+var sortAsc = false;
+function sortMarks() {
+  sortAsc = !sortAsc;
+  var list = document.getElementById('marksList');
+  Array.from(list.querySelectorAll('.mark-row'))
+    .sort(function(a, b) {
+      return sortAsc
+        ? parseInt(a.dataset.score) - parseInt(b.dataset.score)
+        : parseInt(b.dataset.score) - parseInt(a.dataset.score);
+    })
+    .forEach(function(r) { list.appendChild(r); });
+}
+
+/* ═══════════════════════════════════════════
+   TASK BADGE CYCLE
+═══════════════════════════════════════════ */
+var states = ['Done', 'In Progress', 'Pending'];
+function cycleTask(el) {
+  var i = parseInt(el.dataset.idx);
+  var next = states[(states.indexOf(tasks[i].status) + 1) % states.length];
+  tasks[i].status = next;
+  el.textContent = next;
+  el.style.background = taskColors[next];
+}
+
+/* ═══════════════════════════════════════════
+   CHECKLIST TOGGLE
+═══════════════════════════════════════════ */
+function toggleCheck(item) {
+  var i = parseInt(item.dataset.idx);
+  checkItems[i].done = !checkItems[i].done;
+  var box   = item.querySelector('.check-box');
+  var label = item.querySelector('.check-label');
+  box.classList.toggle('done-box', checkItems[i].done);
+  box.classList.toggle('pend-box', !checkItems[i].done);
+  box.textContent = checkItems[i].done ? '✓' : '';
+  label.classList.toggle('striked', checkItems[i].done);
+  updateProgress();
+}
+
+function updateProgress() {
+  var total = checkItems.length;
+  var done  = checkItems.filter(function(c) { return c.done; }).length;
+  var pct   = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').innerHTML =
+    '📊 Progress: <strong style="color:#22c55e">' + done + ' of ' + total + '</strong> completed — ' + pct + '%';
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+function showModal(icon, title, desc, stat) {
+  document.getElementById('mIcon').textContent  = icon;
+  document.getElementById('mTitle').textContent = title;
+  document.getElementById('mDesc').textContent  = desc;
+  document.getElementById('mStat').textContent  = stat;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+render();
+filterStudents('all');
 </script>
 </body>
 </html>
