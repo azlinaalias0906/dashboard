@@ -6,22 +6,22 @@
 <title>Dashboard Pencapaian Pelajar — Diploma Pengurusan Hotel</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #f5f0eb; color: #1a1a2e; font-size: 14px; display: flex; min-height: 100vh; }
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #fdf2f8; color: #1a1a2e; font-size: 14px; display: flex; min-height: 100vh; }
 
 /* ── SIDEBAR ── */
-.sidebar { width: 230px; min-height: 100vh; background: linear-gradient(180deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top:0; left:0; bottom:0; z-index:100; }
+.sidebar { width: 230px; min-height: 100vh; background: linear-gradient(180deg,#831843 0%,#9d174d 50%,#be185d 100%); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top:0; left:0; bottom:0; z-index:100; }
 .sb-logo { padding: 20px 18px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:10px; }
 .sb-logo-icon { font-size: 26px; }
 .sb-logo-text h2 { font-size: 13px; font-weight: 800; line-height: 1.3; }
 .sb-logo-text p  { font-size: 10px; color: #94a3b8; margin-top: 1px; }
 .sb-user { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:10px; }
-.sb-avatar { width:34px; height:34px; border-radius:50%; background: linear-gradient(135deg,#f59e0b,#d97706); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
+.sb-avatar { width:34px; height:34px; border-radius:50%; background: linear-gradient(135deg,#ec4899,#be185d); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; }
 .sb-uname { font-size:12px; font-weight:700; }
 .sb-urole { font-size:10px; color:#94a3b8; }
 .sb-nav { padding: 8px 0; flex:1; overflow-y:auto; }
 .nav-item { display:flex; align-items:center; gap:10px; padding:10px 18px; font-size:12px; font-weight:500; color:#94a3b8; cursor:pointer; transition:all 0.15s; border-left:3px solid transparent; white-space:nowrap; }
 .nav-item:hover  { background:rgba(255,255,255,0.06); color:#fff; }
-.nav-item.active { background:rgba(245,158,11,0.15); color:#f59e0b; border-left-color:#f59e0b; }
+.nav-item.active { background:rgba(236,72,153,0.18); color:#fce7f3; border-left-color:#ec4899; }
 .nav-icon { font-size:14px; width:18px; text-align:center; flex-shrink:0; }
 .nav-badge { margin-left:auto; background:#ef4444; color:#fff; font-size:10px; font-weight:800; padding:1px 6px; border-radius:10px; }
 .sb-footer { padding:12px 18px; border-top:1px solid rgba(255,255,255,0.08); font-size:10px; color:#475569; }
@@ -36,8 +36,8 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 .topbar-right { display:flex; gap:8px; align-items:center; }
 .tb-btn { border:1px solid #e5e7eb; background:#fff; border-radius:8px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; color:#57606a; display:flex; align-items:center; gap:6px; }
 .tb-btn:hover { background:#f7f8fa; }
-.tb-btn.gold { background:#f59e0b; color:#fff; border-color:#f59e0b; }
-.tb-btn.gold:hover { background:#d97706; }
+.tb-btn.gold { background:#ec4899; color:#fff; border-color:#ec4899; }
+.tb-btn.gold:hover { background:#be185d; }
 .tb-btn.purple { background:#fff; color:#7c5cd8; border-color:#7c5cd8; }
 .tb-btn.purple.on { background:#7c5cd8; color:#fff; }
 .notif-wrap { position:relative; }
@@ -58,12 +58,12 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 .alert-close { background:none; border:none; cursor:pointer; font-size:15px; color:#9ca3af; }
 
 /* ── COUNTDOWN ── */
-.countdown-bar { background: linear-gradient(135deg,#1a1a2e,#0f3460); color:#fff; border-radius:10px; padding:14px 20px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
+.countdown-bar { background: linear-gradient(135deg,#831843,#be185d); color:#fff; border-radius:10px; padding:14px 20px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
 .cd-label { font-size:12px; color:#94a3b8; }
 .cd-title { font-size:15px; font-weight:800; margin-top:2px; }
 .cd-boxes { display:flex; gap:8px; }
 .cd-box { background:rgba(255,255,255,0.1); border-radius:8px; padding:8px 14px; text-align:center; min-width:50px; }
-.cd-num { font-size:22px; font-weight:800; color:#f59e0b; line-height:1; }
+.cd-num { font-size:22px; font-weight:800; color:#f9a8d4; line-height:1; }
 .cd-unit { font-size:10px; color:#94a3b8; margin-top:2px; }
 
 /* ── STAT CARDS ── */
@@ -77,7 +77,7 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 .trend-dn { background:#fef2f2; color:#dc2626; }
 .sc-val { font-size:30px; font-weight:800; margin:6px 0 3px; line-height:1; }
 .sc-desc { font-size:11px; color:#57606a; }
-.c-gold   { border-top-color:#f59e0b; } .c-gold   .sc-val { color:#d97706; }
+.c-gold   { border-top-color:#ec4899; } .c-gold   .sc-val { color:#be185d; }
 .c-green  { border-top-color:#22c55e; } .c-green  .sc-val { color:#16a34a; }
 .c-blue   { border-top-color:#3b82d4; } .c-blue   .sc-val { color:#3b82d4; }
 .c-purple { border-top-color:#7c5cd8; } .c-purple .sc-val { color:#7c5cd8; }
@@ -90,11 +90,11 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 
 /* ── PANEL ── */
 .panel { background:#fff; border-radius:12px; border:1px solid #e5e7eb; padding:18px; }
-.panel.gold-border { border-top:3px solid #f59e0b; }
+.panel.gold-border { border-top:3px solid #ec4899; }
 .p-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .p-title { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:#1a1a2e; }
 .p-icon { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
-.pi-gold   { background:#fff8e1; }
+.pi-gold   { background:#fce7f3; }
 .pi-green  { background:#f0fdf4; }
 .pi-blue   { background:#eff6ff; }
 .pi-purple { background:#faf5ff; }
@@ -103,7 +103,7 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 
 /* ── BUTTONS ── */
 .btn { padding:6px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all 0.15s; }
-.btn-gold   { background:#f59e0b; color:#fff; } .btn-gold:hover   { background:#d97706; }
+.btn-gold   { background:#ec4899; color:#fff; } .btn-gold:hover   { background:#be185d; }
 .btn-green  { background:#22c55e; color:#fff; } .btn-green:hover  { background:#16a34a; }
 .btn-blue   { background:#3b82d4; color:#fff; } .btn-blue:hover   { background:#2563eb; }
 .btn-red    { background:#ef4444; color:#fff; } .btn-red:hover    { background:#dc2626; }
@@ -118,22 +118,22 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 .grade-lbl { font-size:11px; color:#57606a; margin-top:3px; }
 .gA { background:#f0fdf4; } .gA .grade-num { color:#16a34a; }
 .gB { background:#eff6ff; } .gB .grade-num { color:#3b82d4; }
-.gC { background:#fff8e1; } .gC .grade-num { color:#d97706; }
+.gC { background:#fff8e1; } .gC .grade-num { color:#be185d; }
 .gD { background:#fef2f2; } .gD .grade-num { color:#ef4444; }
 .gF { background:#f5f3ff; } .gF .grade-num { color:#7c5cd8; }
 
 /* ── SEARCH & FILTER ── */
 .sf-bar { display:flex; gap:10px; margin-bottom:14px; align-items:center; flex-wrap:wrap; }
 .sf-input { flex:1; min-width:200px; max-width:280px; padding:8px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:13px; font-family:inherit; outline:none; }
-.sf-input:focus { border-color:#f59e0b; }
+.sf-input:focus { border-color:#ec4899; }
 .fpills { display:flex; gap:6px; flex-wrap:wrap; }
 .fp { padding:5px 13px; border-radius:20px; border:1px solid #e5e7eb; background:#fff; font-size:11px; font-weight:700; cursor:pointer; color:#57606a; transition:all 0.15s; }
-.fp:hover { border-color:#f59e0b; color:#d97706; }
+.fp:hover { border-color:#ec4899; color:#be185d; }
 .fp.active { color:#fff; border-color:transparent; }
 .fp.fAll.active  { background:#1a1a2e; }
 .fp.fExc.active  { background:#16a34a; }
 .fp.fGood.active { background:#3b82d4; }
-.fp.fAvg.active  { background:#d97706; }
+.fp.fAvg.active  { background:#ec4899; }
 .fp.fLow.active  { background:#ef4444; }
 
 /* ── STUDENT TABLE ── */
@@ -149,7 +149,7 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 .att-fill { height:100%; border-radius:20px; }
 .lv-pill { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; color:#fff; white-space:nowrap; }
 .act-btn { background:#f7f8fa; border:1px solid #e5e7eb; border-radius:6px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; transition:all 0.15s; color:#57606a; }
-.act-btn:hover { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+.act-btn:hover { background:#ec4899; color:#fff; border-color:#ec4899; }
 
 /* ── SUBJECT CARDS ── */
 .subj-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
@@ -225,26 +225,26 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 /* ── CHECKLIST ── */
 .chk-list { display:flex; flex-direction:column; gap:7px; }
 .chk-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:#f7f8fa; border-radius:8px; cursor:pointer; user-select:none; transition:background 0.15s; }
-.chk-item:hover { background:#fff8e1; }
+.chk-item:hover { background:#fce7f3; }
 .chk-box { width:17px; height:17px; border-radius:4px; border:2px solid #d1d5db; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; transition:all 0.15s; }
-.chk-done { background:#f59e0b; border-color:#f59e0b; color:#fff; }
+.chk-done { background:#ec4899; border-color:#ec4899; color:#fff; }
 .chk-pend { background:#fff; color:transparent; }
 .chk-lbl  { flex:1; font-size:12px; }
 .chk-lbl.struck { text-decoration:line-through; color:#9ca3af; }
 .chk-tag  { font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; color:#fff; }
 .prog-wrap { background:#f0f0f0; border-radius:20px; height:7px; overflow:hidden; margin-top:10px; }
-.prog-fill { height:100%; border-radius:20px; background:linear-gradient(90deg,#f59e0b,#d97706); transition:width 0.4s; }
+.prog-fill { height:100%; border-radius:20px; background:linear-gradient(90deg,#ec4899,#be185d); transition:width 0.4s; }
 .prog-txt  { font-size:11px; color:#57606a; margin-top:5px; }
 
 /* ── EDIT PANEL ── */
-.edit-panel { display:none; background:#fff; border:2px solid #7c5cd8; border-radius:12px; padding:16px 18px; margin-bottom:16px; }
+.edit-panel { display:none; background:#fff; border:2px solid #ec4899; border-radius:12px; padding:16px 18px; margin-bottom:16px; }
 .edit-panel.open { display:block; }
-.edit-panel h3 { font-size:13px; font-weight:800; color:#7c5cd8; margin-bottom:12px; }
+.edit-panel h3 { font-size:13px; font-weight:800; color:#be185d; margin-bottom:12px; }
 .eg { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
 .ef { display:flex; flex-direction:column; gap:3px; }
 .ef label { font-size:10px; font-weight:700; color:#57606a; text-transform:uppercase; letter-spacing:0.4px; }
 .ef input, .ef select { padding:6px 9px; border:1px solid #e5e7eb; border-radius:7px; font-size:12px; font-family:inherit; outline:none; }
-.ef input:focus, .ef select:focus { border-color:#7c5cd8; }
+.ef input:focus, .ef select:focus { border-color:#ec4899; }
 .sel-row { display:flex; gap:8px; align-items:flex-end; margin-bottom:12px; }
 .sel-row .ef { flex:1; }
 .ea { display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; }
@@ -263,7 +263,7 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 .modal-k { font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; }
 .modal-v { font-size:13px; font-weight:700; margin-top:2px; }
 .modal-close { display:block; width:100%; padding:10px; background:#1a1a2e; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; margin-top:4px; }
-.modal-close:hover { background:#f59e0b; }
+.modal-close:hover { background:#ec4899; }
 
 /* ── NOTIF PANEL ── */
 .notif-panel { display:none; position:fixed; top:60px; right:16px; width:290px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:200; overflow:hidden; }
@@ -488,7 +488,7 @@ footer { text-align:center; padding:14px 24px; border-top:1px solid #e5e7eb; fon
 /* ══════════════ DATA ══════════════ */
 var SUBJ = ['Hotel Operations','F&B Service','Housekeeping','Front Office','Event Management','Hospitality Law'];
 var SUBJ_SHORT = ['Hotel Ops','F&B','Housekeeping','Front Office','Event Mgmt','Hosp. Law'];
-var SUBJ_COLORS = ['#f59e0b','#22c55e','#3b82d4','#7c5cd8','#ef4444','#06b6d4'];
+var SUBJ_COLORS = ['#ec4899','#22c55e','#3b82d4','#be185d','#f59e0b','#06b6d4'];
 
 var students = [
   {name:'Ahmad Farid',    matric:'DPH2401',sem:2,attend:95,scores:[88,92,85,90,87,84],grade:'A',status:'Lulus'},
@@ -967,7 +967,7 @@ function showStatModal(l,v,d){
   document.getElementById('mName').textContent=l;
   document.getElementById('mRole').textContent=d;
   document.getElementById('mScore').textContent=v;
-  document.getElementById('mScore').style.color='#f59e0b';
+  document.getElementById('mScore').style.color='#ec4899';
   document.getElementById('mGrade').textContent='';
   document.getElementById('mGrid').innerHTML='';
   document.getElementById('overlay').classList.add('open');
